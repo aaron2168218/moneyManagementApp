@@ -6,13 +6,7 @@ const LoginScreen = ({ navigation }) => {
   const [password, setPassword] = useState('');
 
   const handleLogin = () => {
-    // Dummy login validation
-    if (username.trim() && password.trim()) {
-      // Navigate to Home after successful login
-      navigation.replace('Home');
-    } else {
-      Alert.alert("Error", "Please enter both username and password");
-    }
+    navigation.replace('Main'); 
   };
 
   return (
@@ -45,13 +39,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#f5f5f5', // Background color matching your app's theme
+    backgroundColor: '#f5f5f5', 
   },
   title: {
     fontSize: 24,
     marginBottom: 20,
     fontWeight: 'bold',
-    color: '#333', // Title color matching your app's theme
+    color: '#333', 
   },
   input: {
     borderWidth: 1,
@@ -60,10 +54,10 @@ const styles = StyleSheet.create({
     padding: 10,
     marginBottom: 20,
     borderRadius: 5,
-    backgroundColor: '#fff', // Input background color
+    backgroundColor: '#fff', 
   },
   button: {
-    backgroundColor: '#4e9caf', // Button color matching your app's theme
+    backgroundColor: '#4e9caf', 
     padding: 15,
     borderRadius: 5,
     width: '80%',

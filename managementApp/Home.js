@@ -1,17 +1,22 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, Button, Alert, Modal, TouchableOpacity, FlatList } from 'react-native';
+import DropDownPicker from 'react-native-dropdown-picker';
 
 export default function HomeScreen() {
   const [amount, setAmount] = useState('');
-  const [category, setCategory] = useState('');
+  const [category, setCategory] = useState(null);
   const [expenses, setExpenses] = useState([]);
-  const [modalVisible, setModalVisible] = useState(false);
-
-  const categories = ['Food', 'Transport', 'Utilities', 'Entertainment', 'Other']; 
+  const [open, setOpen] = useState(false);
+  const [items, setItems] = useState([
+    {label: 'Food', value: 'Food'},
+    {label: 'Transport', value: 'Transport'},
+    {label: 'Utilities', value: 'Utilities'},
+    {label: 'Entertainment', value: 'Entertainment'},
+    {label: 'Other', value: 'Other'}
+  ]);
 
   const handleAmountChange = (input) => {
     let formattedInput = input.replace(/[^0-9.]/g, '');
-
     const parts = formattedInput.split('.');
   
     if (parts.length > 1 && parts[1].length > 2) {
@@ -20,7 +25,7 @@ export default function HomeScreen() {
     }
 
     setAmount(formattedInput);
-  };44
+  };
 
   const handleSubmit = () => {
     const now = new Date(); 
@@ -30,7 +35,7 @@ export default function HomeScreen() {
       { id: Date.now().toString(), amount: `£${amount}`, category, dateTime } 
     ]);
     setAmount('');
-    setCategory('');
+    setCategory(null);
   };
 
   const deleteExpense = (id) => {
@@ -51,48 +56,30 @@ export default function HomeScreen() {
         placeholder="£0.00"
         keyboardType="numeric"
       />
-      <Text>Selected Category: {category}</Text>
-      <Button title="Select Category" onPress={() => setModalVisible(true)} />
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => {
-          setModalVisible(!modalVisible);
-        }}
-      >
-        <View style={styles.centeredView}>
-          <View style={styles.modalView}>
-            {categories.map((item, index) => (
-              <TouchableOpacity
-                key={index}
-                style={styles.modalButton}
-                onPress={() => {
-                  setCategory(item);
-                  setModalVisible(!modalVisible);
-                }}
-              >
-                <Text style={styles.textStyle}>{item}</Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        </View>
-      </Modal>
+      <DropDownPicker
+        open={open}
+        value={category}
+        items={items}
+        setOpen={setOpen}
+        setValue={setCategory}
+        setItems={setItems}
+        zIndex={3000}
+        zIndexInverse={1000}
+      />
       <Button title="Log Expense" onPress={handleSubmit} disabled={!amount || !category} />
       <FlatList
         data={expenses}
         keyExtractor={item => item.id}
         renderItem={({ item }) => (
-    <View style={styles.expenseItem}>
-      <Text>{item.category}: {item.amount} - {item.dateTime}</Text>
-      <TouchableOpacity onPress={() => deleteExpense(item.id)}>
-        <Text style={styles.deleteButton}>Delete</Text>
-      </TouchableOpacity>
-    </View>
-    
-  )}
-/>
-<View style={styles.totalContainer}>
+          <View style={styles.expenseItem}>
+            <Text>{item.category}: {item.amount} - {item.dateTime}</Text>
+            <TouchableOpacity onPress={() => deleteExpense(item.id)}>
+              <Text style={styles.deleteButton}>Delete</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+      />
+      <View style={styles.totalContainer}>
         <Text style={styles.total}>Total: £{calculateTotal()}</Text>
       </View>
     </View>

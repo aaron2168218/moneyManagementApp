@@ -3,74 +3,86 @@ import {
   View,
   Text,
   TextInput,
-  StyleSheet,
   TouchableOpacity,
-  FlatList,
+  StyleSheet,
   SafeAreaView,
+  FlatList,
+  Alert,
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import { useNavigation } from "@react-navigation/native";
+import { LogExpense } from "./LogExpense";
+import { format } from "date-fns";
 
-export const categoryColors = {
-  Food: "#FF5733",
-  Transport: "#C70039",
-  Utilities: "#900C3F",
-  Entertainment: "#581845",
-  Other: "#FFC300",
-};
-
-export default function HomeScreen() {
+const HomeScreen = () => {
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState(null);
-  const [expenses, setExpenses] = useState([]);
   const [open, setOpen] = useState(false);
-  const [items, setItems] = useState([
+  const items = [
     { label: "Food", value: "Food" },
     { label: "Transport", value: "Transport" },
     { label: "Utilities", value: "Utilities" },
     { label: "Entertainment", value: "Entertainment" },
     { label: "Other", value: "Other" },
-  ]);
+  ];
   const navigation = useNavigation();
+  const { expenses, addExpense, deleteExpense } = LogExpense();
 
   const handleAmountChange = (input) => {
-    let formattedInput = input.replace(/[^0-9.]/g, "");
-    const parts = formattedInput.split(".");
-
-    if (parts.length > 1 && parts[1].length > 2) {
-      parts[1] = parts[1].substring(0, 2);
-      formattedInput = parts.join(".");
-    }
-
+    const formattedInput = input.replace(/[^0-9.]/g, "").slice(0, 6);
     setAmount(formattedInput);
   };
 
   const handleSubmit = () => {
-    const now = new Date();
-    const dateTime = `${now.toLocaleDateString()} ${now.toLocaleTimeString()}`;
-    setExpenses((prevExpenses) => [
-      ...prevExpenses,
-      { id: Date.now().toString(), amount: `£${amount}`, category, dateTime },
-    ]);
+    addExpense({
+      amount: `£${amount}`,
+      category,
+      dateTime: new Date().toISOString(),
+    });
     setAmount("");
     setCategory(null);
   };
 
-  const deleteExpense = (id) => {
-    setExpenses((prevExpenses) =>
-      prevExpenses.filter((expense) => expense.id !== id)
+  const handleDeleteExpense = (id) => {
+    Alert.alert(
+      "Delete Expense",
+      "Are you sure you want to delete this expense?",
+      [
+        { text: "Cancel" },
+        { text: "Delete", onPress: () => deleteExpense(id) },
+      ],
+      { cancelable: false }
     );
   };
 
-  const calculateTotal = () => {
-    return expenses
-      .reduce((acc, curr) => acc + parseFloat(curr.amount.replace("£", "")), 0)
+  const calculateTotalExpenses = () => {
+    const validExpenses = expenses || [];
+    return validExpenses
+      .reduce(
+        (total, expense) => total + parseFloat(expense.amount.replace("£", "")),
+        0
+      )
       .toFixed(2);
   };
 
-  const navigateToDataScreen = () => {
-    navigation.navigate("Data", { expenses });
-  };
+  const renderItem = ({ item }) => (
+    <View style={styles.expenseItem}>
+      <View style={styles.expenseDetails}>
+        <Text
+          style={styles.expenseText}
+        >{`${item.category}: ${item.amount}`}</Text>
+        <Text style={styles.expenseDate}>
+          {format(new Date(item.dateTime), "Pp")}
+        </Text>
+      </View>
+      <TouchableOpacity
+        onPress={() => handleDeleteExpense(item.id)}
+        style={styles.deleteButtonContainer}
+      >
+        <Text style={styles.deleteButtonText}>Delete</Text>
+      </TouchableOpacity>
+    </View>
+  );
 
   return (
     <SafeAreaView style={styles.container}>
@@ -81,8 +93,10 @@ export default function HomeScreen() {
         style={styles.input}
         onChangeText={handleAmountChange}
         value={amount}
-        placeholder="£0.00"
+        placeholder="Enter amount (£)"
         keyboardType="numeric"
+        placeholderTextColor="#666"
+        accessibilityLabel="Amount Input"
       />
       <DropDownPicker
         open={open}
@@ -90,58 +104,60 @@ export default function HomeScreen() {
         items={items}
         setOpen={setOpen}
         setValue={setCategory}
-        setItems={setItems}
+        setItems={() => {}}
         zIndex={3000}
         zIndexInverse={1000}
         containerStyle={styles.dropdownContainer}
         style={styles.dropdown}
         dropDownContainerStyle={styles.dropdownBox}
+        placeholder="Select Category"
+        placeholderStyle={{ color: "#666" }}
+        accessibilityLabel="Category Dropdown"
       />
       <TouchableOpacity
         style={styles.button}
         onPress={handleSubmit}
         disabled={!amount || !category}
       >
-        <Text style={styles.buttonText}>Log Expense</Text>
+        <Text style={styles.buttonText}>Add Expense</Text>
       </TouchableOpacity>
-      <TouchableOpacity style={styles.button} onPress={navigateToDataScreen}>
-        <Text style={styles.buttonText}>View Data</Text>
+      <TouchableOpacity
+        style={styles.viewDataButton}
+        onPress={() => navigation.navigate("Data")}
+      >
+        <Text style={styles.viewDataButtonText}>View Data</Text>
       </TouchableOpacity>
       <FlatList
         data={expenses}
-        keyExtractor={(item) => item.id}
-        renderItem={({ item }) => (
-          <View style={styles.expenseItem}>
-            <Text style={styles.expenseText}>
-              {item.category}: {item.amount} - {item.dateTime}
-            </Text>
-            <TouchableOpacity onPress={() => deleteExpense(item.id)}>
-              <Text style={styles.deleteButton}>Delete</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-        style={styles.list}
+        renderItem={renderItem}
+        keyExtractor={(item) => item.id.toString()}
+        style={styles.expensesList}
       />
-      <View style={styles.totalContainer}>
-        <Text style={styles.total}>Total: £{calculateTotal()}</Text>
+      <View style={styles.totalExpensesContainer}>
+        <Text style={styles.totalExpensesText}>
+          Total Spent: £{calculateTotalExpenses()}
+        </Text>
       </View>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
     backgroundColor: "#f5f5f5",
   },
   headerContainer: {
-    marginBottom: 20,
+    padding: 20,
+    paddingBottom: 10,
+    backgroundColor: "#4e9caf",
+    borderBottomLeftRadius: 20,
+    borderBottomRightRadius: 20,
   },
   header: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#333",
+    color: "#fff",
     textAlign: "center",
   },
   input: {
@@ -149,13 +165,14 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ddd",
     padding: 10,
+    marginTop: 20,
     marginBottom: 10,
     borderRadius: 8,
     fontSize: 16,
     backgroundColor: "#fff",
   },
   dropdownContainer: {
-    marginBottom: 10,
+    marginBottom: 20,
   },
   dropdown: {
     backgroundColor: "#fff",
@@ -176,32 +193,74 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
+  viewDataButton: {
+    backgroundColor: "#4e9caf",
+    padding: 15,
+    borderRadius: 8,
+    alignItems: "center",
+    marginHorizontal: 20,
+    marginBottom: 10,
+  },
+  viewDataButtonText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+  },
+  expensesList: {
+    flex: 1,
+  },
   expenseItem: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
-    padding: 10,
+    padding: 15,
+    marginHorizontal: 20,
     marginVertical: 5,
-    backgroundColor: "#e8eaf6",
-    borderRadius: 5,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    elevation: 1,
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 3.84,
   },
-  expenseText: {
-    fontSize: 14,
-    color: "#333",
-  },
-  deleteButton: {
-    color: "#ff0000",
-    fontWeight: "bold",
-  },
-  totalContainer: {
-    marginTop: 20,
-  },
-  total: {
-    fontSize: 18,
-    fontWeight: "bold",
-    color: "#333",
-  },
-  list: {
+  expenseDetails: {
     flex: 1,
   },
+  expenseText: {
+    color: "#333",
+    fontSize: 16,
+  },
+  expenseDate: {
+    fontSize: 14,
+    color: "#666",
+  },
+  deleteButtonContainer: {
+    justifyContent: "center",
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    backgroundColor: "#ff6b6b",
+    borderRadius: 5,
+  },
+  deleteButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  totalExpensesContainer: {
+    padding: 20,
+    borderTopWidth: 1,
+    borderTopColor: "#ddd",
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  totalExpensesText: {
+    fontSize: 20,
+    fontWeight: "bold",
+    color: "#333",
+  },
 });
+
+export default HomeScreen;

@@ -132,14 +132,15 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 20,
+    paddingHorizontal: 30, // Increased padding for sides
+    paddingTop: 50, // Increased padding for top
     backgroundColor: "#f5f5f5",
   },
   headerContainer: {
-    marginBottom: 20,
+    marginBottom: 40, // Increased margin bottom
   },
   header: {
-    fontSize: 24,
+    fontSize: 26, // Increased font size
     fontWeight: "bold",
     color: "#333",
     textAlign: "center",
@@ -149,13 +150,13 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ddd",
     padding: 10,
-    marginBottom: 10,
-    borderRadius: 8,
-    fontSize: 16,
+    marginBottom: 20, // Increased margin bottom
+    borderRadius: 10, // Increased border radius
+    fontSize: 18, // Increased font size
     backgroundColor: "#fff",
   },
   dropdownContainer: {
-    marginBottom: 10,
+    marginBottom: 20, // Increased margin bottom
   },
   dropdown: {
     backgroundColor: "#fff",
@@ -167,26 +168,26 @@ const styles = StyleSheet.create({
   button: {
     backgroundColor: "#4e9caf",
     padding: 15,
-    borderRadius: 8,
+    borderRadius: 10, // Increased border radius
     alignItems: "center",
-    marginBottom: 10,
+    marginBottom: 20, // Increased margin bottom
   },
   buttonText: {
     color: "#fff",
-    fontSize: 16,
+    fontSize: 18, // Increased font size
     fontWeight: "bold",
   },
   expenseItem: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    padding: 10,
-    marginVertical: 5,
+    padding: 15, // Increased padding
+    marginVertical: 10, // Increased vertical margin
     backgroundColor: "#e8eaf6",
-    borderRadius: 5,
+    borderRadius: 10, // Increased border radius
   },
   expenseText: {
-    fontSize: 14,
+    fontSize: 16, // Increased font size
     color: "#333",
   },
   deleteButton: {
@@ -194,12 +195,13 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   totalContainer: {
-    marginTop: 20,
+    marginTop: 30, // Increased margin top
   },
   total: {
-    fontSize: 18,
+    fontSize: 20, // Increased font size
     fontWeight: "bold",
     color: "#333",
+    textAlign: "center", // Centered the total amount text
   },
   list: {
     flex: 1,

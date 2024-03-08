@@ -3,11 +3,14 @@ import { StatusBar } from "expo-status-bar";
 import { NavigationContainer } from "@react-navigation/native";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { createStackNavigator } from "@react-navigation/stack";
+import { QueryClient, QueryClientProvider } from "react-query";
 import HomeScreen from "./Home";
 import ProfileScreen from "./Profile";
 import Budget from "./Budget";
-import LoginScreen from "./LoginScreen"; // Assuming you have a LoginScreen component
+import LoginScreen from "./LoginScreen";
 import DataScreen from "./DataScreen";
+
+const queryClient = new QueryClient();
 
 const Tab = createBottomTabNavigator();
 const Stack = createStackNavigator();
@@ -25,12 +28,14 @@ function MainApp() {
 
 export default function App() {
   return (
-    <NavigationContainer>
-      <Stack.Navigator screenOptions={{ headerShown: false }}>
-        <Stack.Screen name="Login" component={LoginScreen} />
-        <Stack.Screen name="Main" component={MainApp} />
-      </Stack.Navigator>
-      <StatusBar style="auto" />
-    </NavigationContainer>
+    <QueryClientProvider client={queryClient}>
+      <NavigationContainer>
+        <Stack.Navigator screenOptions={{ headerShown: false }}>
+          <Stack.Screen name="Login" component={LoginScreen} />
+          <Stack.Screen name="Main" component={MainApp} />
+        </Stack.Navigator>
+        <StatusBar style="auto" />
+      </NavigationContainer>
+    </QueryClientProvider>
   );
 }

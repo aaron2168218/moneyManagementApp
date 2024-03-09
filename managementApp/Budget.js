@@ -1,57 +1,38 @@
-import React, { useState, useEffect } from "react";
-import { View, Text, TextInput, Button, Alert, StyleSheet } from "react-native";
+import React, { useState } from "react";
+import { View, TextInput, Text, StyleSheet, Button, Alert } from "react-native";
+import { useBudget } from "./BudgetContext";
 
-const Budget = ({ expenses = [] }) => {  // Default value set for expenses
-  const [budgets, setBudgets] = useState({
-    Food: 0,
-    Transport: 0,
-    Utilities: 0,
-    Entertainment: 0,
-    Other: 0,
-  });
+const Budget = () => {
+  const { budgets, updateBudget } = useBudget();
+  const [tempBudgets, setTempBudgets] = useState(budgets);
 
-  const calculateExpensesForCategory = (category) => {
-    return expenses
-      .filter((expense) => expense.category === category)
-      .reduce((acc, curr) => acc + parseFloat(curr.amount.replace("£", "")), 0);
-  };
-
-  const checkBudgets = () => {
-    Object.keys(budgets).forEach((category) => {
-      const spent = calculateExpensesForCategory(category);
-      const budget = budgets[category];
-
-      if (budget > 0 && spent / budget > 0.9) {  // Added check for budget > 0 to avoid division by zero
-        Alert.alert("Budget Alert", `You are nearing your budget limit for ${category}.`);
-      }
+  const handleSaveBudgets = () => {
+    Object.keys(tempBudgets).forEach((category) => {
+      updateBudget(category, tempBudgets[category]);
     });
-  };
-
-  useEffect(() => {
-    checkBudgets();
-  }, [expenses, budgets]);
-
-  const updateBudget = (category, amount) => {
-    setBudgets((prevBudgets) => ({
-      ...prevBudgets,
-      [category]: parseFloat(amount),
-    }));
+    Alert.alert("Budgets Updated", "Your budgets have been successfully updated.");
   };
 
   return (
     <View style={styles.container}>
-      {Object.keys(budgets).map((category) => (
+      {Object.keys(tempBudgets).map((category) => (
         <View key={category} style={styles.budgetItem}>
-          <Text style={styles.category}>{category}:</Text>
+          <Text style={styles.category}>{category}</Text>
           <TextInput
             style={styles.input}
-            onChangeText={(text) => updateBudget(category, text)}
-            value={budgets[category].toString()}
+            value={tempBudgets[category]}
+            onChangeText={(text) =>
+              setTempBudgets((prevBudgets) => ({
+                ...prevBudgets,
+                [category]: text,
+              }))
+            }
             keyboardType="numeric"
+            placeholder="Set budget"
           />
         </View>
       ))}
-      <Button title="Update Budgets" onPress={checkBudgets} />
+      <Button title="Save Budgets" onPress={handleSaveBudgets} />
     </View>
   );
 };
@@ -64,20 +45,17 @@ const styles = StyleSheet.create({
   budgetItem: {
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: "center",
     marginBottom: 20,
   },
   category: {
-    fontSize: 16,
-    fontWeight: "bold",
+    fontSize: 18,
   },
   input: {
     borderWidth: 1,
     borderColor: "#ddd",
-    borderRadius: 5,
     padding: 10,
     width: 100,
-    textAlign: "right",
+    borderRadius: 5,
   },
 });
 

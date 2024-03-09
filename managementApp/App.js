@@ -9,6 +9,7 @@ import ProfileScreen from "./Profile";
 import Budget from "./Budget";
 import LoginScreen from "./LoginScreen";
 import DataScreen from "./DataScreen";
+import { BudgetProvider } from "./BudgetContext";
 
 const queryClient = new QueryClient();
 
@@ -28,6 +29,7 @@ function MainApp() {
 
 export default function App() {
   return (
+    <BudgetProvider>
     <QueryClientProvider client={queryClient}>
       <NavigationContainer>
         <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -37,5 +39,6 @@ export default function App() {
         <StatusBar style="auto" />
       </NavigationContainer>
     </QueryClientProvider>
+    </BudgetProvider>
   );
 }

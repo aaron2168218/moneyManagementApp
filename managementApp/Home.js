@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
@@ -11,29 +11,54 @@ import {
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import { useNavigation } from "@react-navigation/native";
-import { LogExpense } from "./LogExpense";
+import { useBudget } from "./BudgetContext";
+import { LogExpense } from "./LogExpense"; 
 import { format } from "date-fns";
 
 const HomeScreen = () => {
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState(null);
   const [open, setOpen] = useState(false);
-  const items = [
-    { label: "Food", value: "Food" },
-    { label: "Transport", value: "Transport" },
-    { label: "Utilities", value: "Utilities" },
-    { label: "Entertainment", value: "Entertainment" },
-    { label: "Other", value: "Other" },
-  ];
+  const { budgets } = useBudget();
   const navigation = useNavigation();
   const { expenses, addExpense, deleteExpense } = LogExpense();
 
+  useEffect(() => {
+    // Reset category when dropdown is closed and no category is selected
+    if (!open && !category) {
+      setCategory(null);
+    }
+  }, [open, category]);
+
   const handleAmountChange = (input) => {
-    const formattedInput = input.replace(/[^0-9.]/g, "").slice(0, 6);
-    setAmount(formattedInput);
+    if (input === '' || input.match(/^\d+$/) || input.match(/^\d+\.\d{0,2}$/)) {
+      setAmount(input);
+    } else if (input.match(/^\d+\.\d{3,}$/)) {
+      return;
+    }
   };
 
   const handleSubmit = () => {
+    const totalSpentInCategory = expenses.filter(e => e.category === category)
+      .reduce((total, expense) => total + parseFloat(expense.amount.replace("£", "")), 0);
+
+    const newTotal = totalSpentInCategory + parseFloat(amount);
+
+    if (budgets[category] && newTotal > parseFloat(budgets[category])) {
+      Alert.alert(
+        "Over Budget", 
+        `Adding this expense will put you over your ${category} budget. Continue?`, 
+        [
+          { text: "Cancel" },
+          { text: "Continue", onPress: logExpense }
+        ]
+      );
+    } else {
+      logExpense();
+    }
+  };
+
+  const logExpense = () => {
     addExpense({
       amount: `£${amount}`,
       category,
@@ -41,6 +66,7 @@ const HomeScreen = () => {
     });
     setAmount("");
     setCategory(null);
+    setOpen(false);
   };
 
   const handleDeleteExpense = (id) => {
@@ -49,31 +75,21 @@ const HomeScreen = () => {
       "Are you sure you want to delete this expense?",
       [
         { text: "Cancel" },
-        { text: "Delete", onPress: () => deleteExpense(id) },
+        { text: "Delete", onPress: () => deleteExpense(id) }
       ],
       { cancelable: false }
     );
   };
 
-  const calculateTotalExpenses = () => {
-    const validExpenses = expenses || [];
-    return validExpenses
-      .reduce(
-        (total, expense) => total + parseFloat(expense.amount.replace("£", "")),
-        0
-      )
-      .toFixed(2);
-  };
+  const calculateTotalExpenses = () => expenses
+    .reduce((total, expense) => total + parseFloat(expense.amount.replace("£", "")), 0)
+    .toFixed(2);
 
   const renderItem = ({ item }) => (
     <View style={styles.expenseItem}>
       <View style={styles.expenseDetails}>
-        <Text
-          style={styles.expenseText}
-        >{`${item.category}: ${item.amount}`}</Text>
-        <Text style={styles.expenseDate}>
-          {format(new Date(item.dateTime), "Pp")}
-        </Text>
+        <Text style={styles.expenseText}>{`${item.category}: ${item.amount}`}</Text>
+        <Text style={styles.expenseDate}>{format(new Date(item.dateTime), "Pp")}</Text>
       </View>
       <TouchableOpacity
         onPress={() => handleDeleteExpense(item.id)}
@@ -97,11 +113,18 @@ const HomeScreen = () => {
         keyboardType="numeric"
         placeholderTextColor="#666"
         accessibilityLabel="Amount Input"
+        returnKeyType="done"
       />
       <DropDownPicker
         open={open}
         value={category}
-        items={items}
+        items={[
+          { label: "Food", value: "Food" },
+          { label: "Transport", value: "Transport" },
+          { label: "Utilities", value: "Utilities" },
+          { label: "Entertainment", value: "Entertainment" },
+          { label: "Other", value: "Other" },
+        ]}
         setOpen={setOpen}
         setValue={setCategory}
         setItems={() => {}}
@@ -134,9 +157,7 @@ const HomeScreen = () => {
         style={styles.expensesList}
       />
       <View style={styles.totalExpensesContainer}>
-        <Text style={styles.totalExpensesText}>
-          Total Spent: £{calculateTotalExpenses()}
-        </Text>
+        <Text style={styles.totalExpensesText}>Total Spent: £{calculateTotalExpenses()}</Text>
       </View>
     </SafeAreaView>
   );

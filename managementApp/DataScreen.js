@@ -33,14 +33,25 @@ const DataScreen = () => {
     },
   };
 
-  const pieChartData =
-    expenses?.map((expense) => ({
-      name: expense.category,
-      population: parseFloat(expense.amount.replace("£", "")),
-      color: getColorForCategory(expense.category),
+  const expensesByCategory = expenses.reduce((acc, expense) => {
+    const amount = parseFloat(expense.amount.replace("£", ""));
+    if (acc[expense.category]) {
+      acc[expense.category] += amount;
+    } else {
+      acc[expense.category] = amount;
+    }
+    return acc;
+  }, {});
+
+  const pieChartData = Object.entries(expensesByCategory).map(
+    ([category, population]) => ({
+      name: category,
+      population,
+      color: getColorForCategory(category),
       legendFontColor: "#7F7F7F",
       legendFontSize: 15,
-    })) || [];
+    })
+  );
 
   return (
     <SafeAreaView style={styles.container}>

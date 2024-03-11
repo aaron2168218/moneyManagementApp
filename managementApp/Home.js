@@ -12,7 +12,7 @@ import {
 import DropDownPicker from "react-native-dropdown-picker";
 import { useNavigation } from "@react-navigation/native";
 import { useBudget } from "./BudgetContext";
-import { LogExpense } from "./LogExpense"; 
+import { LogExpense } from "./LogExpense";
 import { format } from "date-fns";
 
 const HomeScreen = () => {
@@ -31,7 +31,7 @@ const HomeScreen = () => {
   }, [open, category]);
 
   const handleAmountChange = (input) => {
-    if (input === '' || input.match(/^\d+$/) || input.match(/^\d+\.\d{0,2}$/)) {
+    if (input === "" || input.match(/^\d+$/) || input.match(/^\d+\.\d{0,2}$/)) {
       setAmount(input);
     } else if (input.match(/^\d+\.\d{3,}$/)) {
       return;
@@ -39,19 +39,20 @@ const HomeScreen = () => {
   };
 
   const handleSubmit = () => {
-    const totalSpentInCategory = expenses.filter(e => e.category === category)
-      .reduce((total, expense) => total + parseFloat(expense.amount.replace("£", "")), 0);
+    const totalSpentInCategory = expenses
+      .filter((e) => e.category === category)
+      .reduce(
+        (total, expense) => total + parseFloat(expense.amount.replace("£", "")),
+        0
+      );
 
     const newTotal = totalSpentInCategory + parseFloat(amount);
 
     if (budgets[category] && newTotal > parseFloat(budgets[category])) {
       Alert.alert(
-        "Over Budget", 
-        `Adding this expense will put you over your ${category} budget. Continue?`, 
-        [
-          { text: "Cancel" },
-          { text: "Continue", onPress: logExpense }
-        ]
+        "Over Budget",
+        `Adding this expense will put you over your ${category} budget. Continue?`,
+        [{ text: "Cancel" }, { text: "Continue", onPress: logExpense }]
       );
     } else {
       logExpense();
@@ -75,21 +76,29 @@ const HomeScreen = () => {
       "Are you sure you want to delete this expense?",
       [
         { text: "Cancel" },
-        { text: "Delete", onPress: () => deleteExpense(id) }
+        { text: "Delete", onPress: () => deleteExpense(id) },
       ],
       { cancelable: false }
     );
   };
 
-  const calculateTotalExpenses = () => expenses
-    .reduce((total, expense) => total + parseFloat(expense.amount.replace("£", "")), 0)
-    .toFixed(2);
+  const calculateTotalExpenses = () =>
+    expenses
+      .reduce(
+        (total, expense) => total + parseFloat(expense.amount.replace("£", "")),
+        0
+      )
+      .toFixed(2);
 
   const renderItem = ({ item }) => (
     <View style={styles.expenseItem}>
       <View style={styles.expenseDetails}>
-        <Text style={styles.expenseText}>{`${item.category}: ${item.amount}`}</Text>
-        <Text style={styles.expenseDate}>{format(new Date(item.dateTime), "Pp")}</Text>
+        <Text
+          style={styles.expenseText}
+        >{`${item.category}: ${item.amount}`}</Text>
+        <Text style={styles.expenseDate}>
+          {format(new Date(item.dateTime), "Pp")}
+        </Text>
       </View>
       <TouchableOpacity
         onPress={() => handleDeleteExpense(item.id)}
@@ -157,7 +166,9 @@ const HomeScreen = () => {
         style={styles.expensesList}
       />
       <View style={styles.totalExpensesContainer}>
-        <Text style={styles.totalExpensesText}>Total Spent: £{calculateTotalExpenses()}</Text>
+        <Text style={styles.totalExpensesText}>
+          Total Spent: £{calculateTotalExpenses()}
+        </Text>
       </View>
     </SafeAreaView>
   );

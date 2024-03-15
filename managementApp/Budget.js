@@ -1,38 +1,56 @@
-import React, { useState } from "react";
-import { View, TextInput, Text, StyleSheet, Button, Alert } from "react-native";
-import { useBudget } from "./BudgetContext";
+import React, { useState, useEffect, useContext } from 'react';
+import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { useUser } from './UserContext'; 
 
 const Budget = () => {
-  const { budgets, updateBudget } = useBudget();
-  const [tempBudgets, setTempBudgets] = useState(budgets);
+  const { user, updateBudget } = useUser();
+  const [budget, setBudget] = useState({
+    Food: '',
+    Transport: '',
+    Utilities: '',
+    Entertainment: '',
+    Other: ''
+  });
 
-  const handleSaveBudgets = () => {
-    Object.keys(tempBudgets).forEach((category) => {
-      updateBudget(category, tempBudgets[category]);
-    });
-    Alert.alert("Budgets Updated", "Your budgets have been successfully updated.");
+  useEffect(() => {
+    // Load the current user's budget when the component mounts
+    if (user && user.budgets) {
+      setBudget(user.budgets);
+    }
+  }, [user]);
+
+  const handleChange = (name, value) => {
+    setBudget(prevBudget => ({
+      ...prevBudget,
+      [name]: value
+    }));
+  };
+
+  const handleSubmit = async () => {
+    // Update each category in the database
+    for (const [category, amount] of Object.entries(budget)) {
+      if (user) {
+        await updateBudget(user.id, category, amount);
+      }
+    }
+    console.log("Budget saved:", budget);
   };
 
   return (
     <View style={styles.container}>
-      {Object.keys(tempBudgets).map((category) => (
-        <View key={category} style={styles.budgetItem}>
-          <Text style={styles.category}>{category}</Text>
+      <Text style={styles.title}>Enter your budget</Text>
+      {Object.keys(budget).map((category) => (
+        <View key={category} style={styles.inputGroup}>
+          <Text>{category}</Text>
           <TextInput
             style={styles.input}
-            value={tempBudgets[category]}
-            onChangeText={(text) =>
-              setTempBudgets((prevBudgets) => ({
-                ...prevBudgets,
-                [category]: text,
-              }))
-            }
+            onChangeText={(value) => handleChange(category, value)}
+            value={budget[category]}
             keyboardType="numeric"
-            placeholder="Set budget"
           />
         </View>
       ))}
-      <Button title="Save Budgets" onPress={handleSaveBudgets} />
+      <Button title="Save" onPress={handleSubmit} />
     </View>
   );
 };
@@ -40,21 +58,21 @@ const Budget = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: 'center',
     padding: 20,
   },
-  budgetItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+  title: {
+    fontSize: 24,
     marginBottom: 20,
   },
-  category: {
-    fontSize: 18,
+  inputGroup: {
+    marginBottom: 10,
   },
   input: {
     borderWidth: 1,
-    borderColor: "#ddd",
+    borderColor: '#ddd',
     padding: 10,
-    width: 100,
+    marginBottom: 10,
     borderRadius: 5,
   },
 });

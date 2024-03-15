@@ -8,8 +8,9 @@ import HomeScreen from "./Home";
 import ProfileScreen from "./Profile";
 import Budget from "./Budget";
 import LoginScreen from "./LoginScreen";
+import SignupScreen from "./SignupScreen";
 import DataScreen from "./DataScreen";
-import { BudgetProvider } from "./BudgetContext";
+import { UserProvider } from "./UserContext";
 
 const queryClient = new QueryClient();
 
@@ -29,16 +30,17 @@ function MainApp() {
 
 export default function App() {
   return (
-    <BudgetProvider>
-    <QueryClientProvider client={queryClient}>
-      <NavigationContainer>
-        <Stack.Navigator screenOptions={{ headerShown: false }}>
-          <Stack.Screen name="Login" component={LoginScreen} />
-          <Stack.Screen name="Main" component={MainApp} />
-        </Stack.Navigator>
-        <StatusBar style="auto" />
-      </NavigationContainer>
-    </QueryClientProvider>
-    </BudgetProvider>
+    <UserProvider>
+        <QueryClientProvider client={queryClient}>
+          <NavigationContainer>
+            <Stack.Navigator screenOptions={{ headerShown: false }}>
+              <Stack.Screen name="Login" component={LoginScreen} />
+              <Stack.Screen name="Signup" component={SignupScreen} /> 
+              <Stack.Screen name="Main" component={MainApp} />
+            </Stack.Navigator>
+            <StatusBar style="auto" />
+          </NavigationContainer>
+        </QueryClientProvider>
+    </UserProvider>
   );
 }

@@ -1,6 +1,6 @@
-// LoginScreen.js
 import React, { useState } from 'react';
 import { View, TextInput, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
 import { useUser } from './UserContext'; // Adjust the path as necessary
 
 const LoginScreen = ({ navigation }) => {
@@ -19,6 +19,15 @@ const LoginScreen = ({ navigation }) => {
       }
     } catch (error) {
       Alert.alert('Login Error', 'An error occurred during login');
+    }
+  };
+
+  const clearStorage = async () => {
+    try {
+      await AsyncStorage.clear();
+      Alert.alert('AsyncStorage Cleared', 'Data has been cleared successfully.');
+    } catch (error) {
+      Alert.alert('Clearing AsyncStorage Failed', 'An error occurred while clearing data.');
     }
   };
 
@@ -41,9 +50,14 @@ const LoginScreen = ({ navigation }) => {
       <TouchableOpacity onPress={handleLogin} style={styles.button}>
         <Text style={styles.buttonText}>Log In</Text>
       </TouchableOpacity>
-      {/* Add Create Account Button */}
+
       <TouchableOpacity onPress={() => navigation.navigate('Signup')} style={styles.createAccountButton}>
         <Text style={styles.createAccountButtonText}>Create Account</Text>
+      </TouchableOpacity>
+
+      {/* Button to clear AsyncStorage */}
+      <TouchableOpacity onPress={clearStorage} style={styles.clearStorageButton}>
+        <Text style={styles.clearStorageButtonText}>Clear AsyncStorage</Text>
       </TouchableOpacity>
     </View>
   );
@@ -77,18 +91,29 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     width: '80%',
     alignItems: 'center',
-    marginBottom: 10, // Added some margin bottom for spacing
+    marginBottom: 10, 
   },
   buttonText: {
     color: 'white',
     fontSize: 18,
   },
   createAccountButton: {
-    marginTop: 10, // Added some margin top for spacing
-    // Optional: Adjust the styling as needed to match your design
+    marginTop: 10, 
   },
   createAccountButtonText: {
-    color: '#4e9caf', // Choose a color that fits your app theme
+    color: '#4e9caf',
+    fontSize: 16,
+  },
+  clearStorageButton: {
+    marginTop: 10,
+    backgroundColor: '#ff6b6b',
+    padding: 15,
+    borderRadius: 5,
+    width: '80%',
+    alignItems: 'center',
+  },
+  clearStorageButtonText: {
+    color: 'white',
     fontSize: 16,
   },
 });

@@ -4,8 +4,7 @@ import { useUser } from "./UserContext";
 
 const BudgetScreen = () => {
   const { user, updateBudget } = useUser();
-  // Initialize tempBudgets with the current user's budgets or default values
-  const [tempBudgets, setTempBudgets] = useState(user?.budgets || {
+  const [tempBudgets, setTempBudgets] = useState({
     Food: '',
     Transport: '',
     Utilities: '',
@@ -13,20 +12,29 @@ const BudgetScreen = () => {
     Other: '',
   });
 
-  // Update tempBudgets to reflect any changes in the user's budgets
   useEffect(() => {
+    // Initialize tempBudgets with the user's budget values if available
     if (user && user.budgets) {
       setTempBudgets(user.budgets);
     }
-  }, [user?.budgets]); // Listen for changes specifically in user.budgets
+  }, [user?.budgets]);
 
   const handleSaveBudgets = async () => {
+    // Update the budgets in user context with the tempBudgets
     await Promise.all(
       Object.keys(tempBudgets).map(category =>
         updateBudget(user.id, category, tempBudgets[category])
       )
     );
     Alert.alert("Budgets Updated", "Your budgets have been successfully updated.");
+  };
+
+  const handleBudgetChange = (category, text) => {
+    // Update tempBudgets state when the budget input changes
+    setTempBudgets(prev => ({
+      ...prev,
+      [category]: text
+    }));
   };
 
   return (
@@ -37,10 +45,7 @@ const BudgetScreen = () => {
           <TextInput
             style={styles.input}
             value={tempBudgets[category]}
-            onChangeText={(text) => setTempBudgets((prev) => ({
-              ...prev,
-              [category]: text
-            }))}
+            onChangeText={(text) => handleBudgetChange(category, text)}
             keyboardType="numeric"
             placeholder="Set budget"
           />

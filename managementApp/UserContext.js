@@ -22,7 +22,9 @@ export const UserProvider = ({ children }) => {
             const loadedUsers = await getUsersFromStorage();
             if (loadedUsers.length) {
                 console.log('Loaded users from storage:', loadedUsers);
-                // Optionally set a default user here if needed
+                // Find and set a specific user based on some criteria, e.g., the last logged user
+                // For example purposes, let's set the first user as the current user
+                setUser(loadedUsers[0]); // Adjust this logic as needed
             }
         };
         loadUsers();
@@ -44,7 +46,13 @@ export const UserProvider = ({ children }) => {
         if (userIndex !== -1) {
             users[userIndex].budgets[category] = amount;
             await saveUsersToStorage(users);
-            setUser({ ...users[userIndex] }); // Update context with modified user
+            // Update the local user state if the updated user is the current user
+            if (user?.id === userId) {
+                setUser({ ...users[userIndex] });
+            }
+            console.log(`Budget for ${category} updated to ${amount} for user ${userId}`);
+        } else {
+            console.log(`User with ID ${userId} not found.`);
         }
     };
 
@@ -68,6 +76,19 @@ export const UserProvider = ({ children }) => {
         }
     };
 
+    const deleteExpenditureForUser = async (expenditureId) => {
+        if (!user) return;
+        const users = await getUsersFromStorage();
+        const userIndex = users.findIndex(u => u.id === user.id);
+        if (userIndex !== -1) {
+          // Filter out the expenditure to delete
+          users[userIndex].expenditures = users[userIndex].expenditures.filter(expense => expense.id !== expenditureId);
+          await saveUsersToStorage(users);
+          setUser({ ...users[userIndex] }); // Update context with modified user
+        }
+      };
+      
+
     return (
         <UserContext.Provider value={{
             user,
@@ -76,6 +97,7 @@ export const UserProvider = ({ children }) => {
             updateBudget,
             addExpenditureForUser,
             findUserByUsernameAndPassword,
+            deleteExpenditureForUser,
         }}>
             {children}
         </UserContext.Provider>

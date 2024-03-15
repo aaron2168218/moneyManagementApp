@@ -19,7 +19,7 @@ const HomeScreen = () => {
   const [category, setCategory] = useState(null);
   const [open, setOpen] = useState(false);
   const navigation = useNavigation();
-  const { user, addExpenditureForUser } = useUser(); // Use addExpenditureForUser from UserContext
+  const { user, addExpenditureForUser, deleteExpenditureForUser } = useUser(); // Use addExpenditureForUser from UserContext
 
   // Since budgets are now part of the user data, there's no need to fetch them from useBudget
 
@@ -34,16 +34,51 @@ const HomeScreen = () => {
       Alert.alert("Missing Information", "Please select a category and enter an amount.");
       return;
     }
-
+  
+    // Convert the entered amount to a number for calculations
+    const newExpenditureAmount = parseFloat(amount);
+    
+    // Calculate the total expenditure for the selected category
+    const totalExpenditureForCategory = user.expenditures
+      .filter(expense => expense.category === category)
+      .reduce((sum, currentExpense) => sum + parseFloat(currentExpense.amount.replace('£', '')), 0);
+  
+    // Get the budget limit for the selected category
+    const budgetLimit = parseFloat(user.budgets[category] || 0);
+  
+    // Check if the new total exceeds the budget for the category
+    if (totalExpenditureForCategory + newExpenditureAmount > budgetLimit) {
+      Alert.alert(
+        "Over Budget",
+        `Adding this expenditure would exceed your budget for ${category}. Are you sure you want to proceed?`,
+        [
+          {
+            text: "Cancel",
+            onPress: () => console.log("Addition cancelled"),
+            style: "cancel"
+          },
+          {
+            text: "Proceed",
+            onPress: () => proceedWithExpenditure()
+          }
+        ]
+      );
+    } else {
+      proceedWithExpenditure();
+    }
+  };
+  
+  const proceedWithExpenditure = async () => {
     const newExpenditure = {
       id: Date.now().toString(),
       amount: `£${amount}`,
       category,
       dateTime: new Date().toISOString(),
     };
-
+  
     await addExpenditureForUser(newExpenditure);
-    
+  
+    // Reset state after adding
     setAmount("");
     setCategory(null);
     setOpen(false);
@@ -51,7 +86,24 @@ const HomeScreen = () => {
 
   // This function can remain unchanged if it uses a local state
   const handleDeleteExpense = async (id) => {
-    // Implement deletion logic, potentially updating it in the UserContext
+    Alert.alert(
+      "Delete Expenditure",
+      "Are you sure you want to delete this expenditure?",
+      [
+        {
+          text: "Cancel",
+          onPress: () => console.log("Deletion cancelled"),
+          style: "cancel"
+        },
+        {
+          text: "Delete",
+          onPress: async () => {
+            await deleteExpenditureForUser(id);
+            // Optionally, you could add some UI feedback here, like a Toast message
+          }
+        }
+      ]
+    );
   };
 
   const calculateTotalExpenses = () => {

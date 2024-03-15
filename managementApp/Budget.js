@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
-import { useUser } from './UserContext'; // Assuming UserContext is in the same directory
+import { useUser } from './UserContext'; 
 
 const Budget = () => {
   const { user, updateBudget } = useUser();

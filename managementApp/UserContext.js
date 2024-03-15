@@ -22,9 +22,7 @@ export const UserProvider = ({ children }) => {
             const loadedUsers = await getUsersFromStorage();
             if (loadedUsers.length) {
                 console.log('Loaded users from storage:', loadedUsers);
-                // Find and set a specific user based on some criteria, e.g., the last logged user
-                // For example purposes, let's set the first user as the current user
-                setUser(loadedUsers[0]); // Adjust this logic as needed
+                setUser(loadedUsers[0]);
             }
         };
         loadUsers();

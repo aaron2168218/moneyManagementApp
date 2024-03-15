@@ -1,27 +1,24 @@
 import React, { useState } from 'react';
 import { View, TextInput, Button, StyleSheet, Alert } from 'react-native';
-import { useUser } from './UserContext'; 
+import { useUser } from './UserContext';
 
 const SignupScreen = ({ navigation }) => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const { addUser, findUserByUsernameAndPassword } = useUser(); 
+  const { addUser, findUserByUsernameAndPassword } = useUser();
 
   const handleSignup = async () => {
     try {
-      // First, check if the user already exists
       const existingUser = await findUserByUsernameAndPassword(username, password);
       if (existingUser) {
         Alert.alert('Signup Failed', 'Username already exists. Choose a different username.');
         return;
       }
-      // If user doesn't exist, proceed to add the new user
       await addUser({ username, password });
       Alert.alert('Signup Successful', 'Your account has been created. Please log in.', [
         { text: 'OK', onPress: () => navigation.navigate('Login') }
       ]);
     } catch (error) {
-      // Handle any errors that occur during the signup process
       Alert.alert('Signup Error', 'An error occurred while creating your account.');
     }
   };
@@ -42,6 +39,8 @@ const SignupScreen = ({ navigation }) => {
         style={styles.input}
       />
       <Button title="Sign Up" onPress={handleSignup} />
+
+      <Button title="Back to Login" onPress={() => navigation.navigate('Login')} color="#a5a5a5" />
     </View>
   );
 };

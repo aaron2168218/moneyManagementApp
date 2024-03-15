@@ -11,79 +11,52 @@ import {
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import { useNavigation } from "@react-navigation/native";
-import { useBudget } from "./BudgetContext";
-import { LogExpense } from "./LogExpense"; 
+import { useUser } from "./UserContext"; // Ensure this is correctly imported
 import { format } from "date-fns";
 
 const HomeScreen = () => {
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState(null);
   const [open, setOpen] = useState(false);
-  const { budgets } = useBudget();
   const navigation = useNavigation();
-  const { expenses, addExpense, deleteExpense } = LogExpense();
+  const { user, addExpenditureForUser } = useUser(); // Use addExpenditureForUser from UserContext
 
-  useEffect(() => {
-    // Reset category when dropdown is closed and no category is selected
-    if (!open && !category) {
-      setCategory(null);
-    }
-  }, [open, category]);
+  // Since budgets are now part of the user data, there's no need to fetch them from useBudget
 
   const handleAmountChange = (input) => {
-    if (input === '' || input.match(/^\d+$/) || input.match(/^\d+\.\d{0,2}$/)) {
+    if (input.match(/^\d*\.?\d{0,2}$/)) {
       setAmount(input);
-    } else if (input.match(/^\d+\.\d{3,}$/)) {
+    }
+  };
+
+  const handleSubmit = async () => {
+    if (!amount || !category) {
+      Alert.alert("Missing Information", "Please select a category and enter an amount.");
       return;
     }
-  };
 
-  const handleSubmit = () => {
-    const totalSpentInCategory = expenses.filter(e => e.category === category)
-      .reduce((total, expense) => total + parseFloat(expense.amount.replace("£", "")), 0);
-
-    const newTotal = totalSpentInCategory + parseFloat(amount);
-
-    if (budgets[category] && newTotal > parseFloat(budgets[category])) {
-      Alert.alert(
-        "Over Budget", 
-        `Adding this expense will put you over your ${category} budget. Continue?`, 
-        [
-          { text: "Cancel" },
-          { text: "Continue", onPress: logExpense }
-        ]
-      );
-    } else {
-      logExpense();
-    }
-  };
-
-  const logExpense = () => {
-    addExpense({
+    const newExpenditure = {
+      id: Date.now().toString(),
       amount: `£${amount}`,
       category,
       dateTime: new Date().toISOString(),
-    });
+    };
+
+    await addExpenditureForUser(newExpenditure);
+    
     setAmount("");
     setCategory(null);
     setOpen(false);
   };
 
-  const handleDeleteExpense = (id) => {
-    Alert.alert(
-      "Delete Expense",
-      "Are you sure you want to delete this expense?",
-      [
-        { text: "Cancel" },
-        { text: "Delete", onPress: () => deleteExpense(id) }
-      ],
-      { cancelable: false }
-    );
+  // This function can remain unchanged if it uses a local state
+  const handleDeleteExpense = async (id) => {
+    // Implement deletion logic, potentially updating it in the UserContext
   };
 
-  const calculateTotalExpenses = () => expenses
-    .reduce((total, expense) => total + parseFloat(expense.amount.replace("£", "")), 0)
-    .toFixed(2);
+  const calculateTotalExpenses = () => {
+    return user?.expenditures?.reduce((total, expense) => total + parseFloat(expense.amount.replace("£", "")), 0).toFixed(2) || '0';
+  };
 
   const renderItem = ({ item }) => (
     <View style={styles.expenseItem}>
@@ -91,10 +64,7 @@ const HomeScreen = () => {
         <Text style={styles.expenseText}>{`${item.category}: ${item.amount}`}</Text>
         <Text style={styles.expenseDate}>{format(new Date(item.dateTime), "Pp")}</Text>
       </View>
-      <TouchableOpacity
-        onPress={() => handleDeleteExpense(item.id)}
-        style={styles.deleteButtonContainer}
-      >
+      <TouchableOpacity onPress={() => handleDeleteExpense(item.id)} style={styles.deleteButtonContainer}>
         <Text style={styles.deleteButtonText}>Delete</Text>
       </TouchableOpacity>
     </View>
@@ -151,9 +121,9 @@ const HomeScreen = () => {
         <Text style={styles.viewDataButtonText}>View Data</Text>
       </TouchableOpacity>
       <FlatList
-        data={expenses}
+        data={user?.expenditures || []} // Use user's expenditures directly
         renderItem={renderItem}
-        keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item) => item.id}
         style={styles.expensesList}
       />
       <View style={styles.totalExpensesContainer}>

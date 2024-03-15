@@ -1,15 +1,31 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { View, TextInput, Text, StyleSheet, Button, Alert } from "react-native";
-import { useBudget } from "./BudgetContext";
+import { useUser } from "./UserContext";
 
-const Budget = () => {
-  const { budgets, updateBudget } = useBudget();
-  const [tempBudgets, setTempBudgets] = useState(budgets);
+const BudgetScreen = () => {
+  const { user, updateBudget } = useUser();
+  // Initialize tempBudgets with the current user's budgets or default values
+  const [tempBudgets, setTempBudgets] = useState(user?.budgets || {
+    Food: '',
+    Transport: '',
+    Utilities: '',
+    Entertainment: '',
+    Other: '',
+  });
 
-  const handleSaveBudgets = () => {
-    Object.keys(tempBudgets).forEach((category) => {
-      updateBudget(category, tempBudgets[category]);
-    });
+  // Update tempBudgets to reflect any changes in the user's budgets
+  useEffect(() => {
+    if (user && user.budgets) {
+      setTempBudgets(user.budgets);
+    }
+  }, [user?.budgets]); // Listen for changes specifically in user.budgets
+
+  const handleSaveBudgets = async () => {
+    await Promise.all(
+      Object.keys(tempBudgets).map(category =>
+        updateBudget(user.id, category, tempBudgets[category])
+      )
+    );
     Alert.alert("Budgets Updated", "Your budgets have been successfully updated.");
   };
 
@@ -21,12 +37,10 @@ const Budget = () => {
           <TextInput
             style={styles.input}
             value={tempBudgets[category]}
-            onChangeText={(text) =>
-              setTempBudgets((prevBudgets) => ({
-                ...prevBudgets,
-                [category]: text,
-              }))
-            }
+            onChangeText={(text) => setTempBudgets((prev) => ({
+              ...prev,
+              [category]: text
+            }))}
             keyboardType="numeric"
             placeholder="Set budget"
           />
@@ -54,9 +68,9 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: "#ddd",
     padding: 10,
-    width: 100,
+    width: "70%",
     borderRadius: 5,
   },
 });
 
-export default Budget;
+export default BudgetScreen;

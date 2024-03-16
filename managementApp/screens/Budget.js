@@ -1,15 +1,15 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
-import { useUser } from './UserContext'; 
+import React, { useState, useEffect, useContext } from "react";
+import { View, Text, TextInput, Button, StyleSheet } from "react-native";
+import { useUser } from "../data/UserContext";
 
 const Budget = () => {
   const { user, updateBudget } = useUser();
   const [budget, setBudget] = useState({
-    Food: '',
-    Transport: '',
-    Utilities: '',
-    Entertainment: '',
-    Other: ''
+    Food: "",
+    Transport: "",
+    Utilities: "",
+    Entertainment: "",
+    Other: "",
   });
 
   useEffect(() => {
@@ -20,9 +20,9 @@ const Budget = () => {
   }, [user]);
 
   const handleChange = (name, value) => {
-    setBudget(prevBudget => ({
+    setBudget((prevBudget) => ({
       ...prevBudget,
-      [name]: value
+      [name]: value,
     }));
   };
 
@@ -58,7 +58,7 @@ const Budget = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: "center",
     padding: 20,
   },
   title: {
@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: "#ddd",
     padding: 10,
     marginBottom: 10,
     borderRadius: 5,

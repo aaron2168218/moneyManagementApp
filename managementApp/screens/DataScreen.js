@@ -1,7 +1,7 @@
 import React from "react";
 import { View, Text, Dimensions, StyleSheet, SafeAreaView } from "react-native";
 import { PieChart } from "react-native-chart-kit";
-import { LogExpense } from "./LogExpense";
+import { LogExpense } from "../data/LogExpense";
 
 const screenWidth = Dimensions.get("window").width;
 

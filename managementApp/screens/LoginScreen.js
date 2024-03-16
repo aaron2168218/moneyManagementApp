@@ -1,11 +1,18 @@
-import React, { useState } from 'react';
-import { View, TextInput, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage'; // Import AsyncStorage
-import { useUser } from './UserContext'; // Adjust the path as necessary
+import React, { useState } from "react";
+import {
+  View,
+  TextInput,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+} from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage"; // Import AsyncStorage
+import { useUser } from "../data/UserContext"; // Adjust the path as necessary
 
 const LoginScreen = ({ navigation }) => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const { setUser, findUserByUsernameAndPassword } = useUser();
 
   const handleLogin = async () => {
@@ -13,21 +20,27 @@ const LoginScreen = ({ navigation }) => {
       const user = await findUserByUsernameAndPassword(username, password);
       if (user) {
         setUser(user);
-        navigation.replace('Main');
+        navigation.replace("Main");
       } else {
-        Alert.alert('Login Failed', 'Invalid username or password');
+        Alert.alert("Login Failed", "Invalid username or password");
       }
     } catch (error) {
-      Alert.alert('Login Error', 'An error occurred during login');
+      Alert.alert("Login Error", "An error occurred during login");
     }
   };
 
   const clearStorage = async () => {
     try {
       await AsyncStorage.clear();
-      Alert.alert('AsyncStorage Cleared', 'Data has been cleared successfully.');
+      Alert.alert(
+        "AsyncStorage Cleared",
+        "Data has been cleared successfully."
+      );
     } catch (error) {
-      Alert.alert('Clearing AsyncStorage Failed', 'An error occurred while clearing data.');
+      Alert.alert(
+        "Clearing AsyncStorage Failed",
+        "An error occurred while clearing data."
+      );
     }
   };
 
@@ -51,12 +64,18 @@ const LoginScreen = ({ navigation }) => {
         <Text style={styles.buttonText}>Log In</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={() => navigation.navigate('Signup')} style={styles.createAccountButton}>
+      <TouchableOpacity
+        onPress={() => navigation.navigate("Signup")}
+        style={styles.createAccountButton}
+      >
         <Text style={styles.createAccountButtonText}>Create Account</Text>
       </TouchableOpacity>
 
       {/* Button to clear AsyncStorage */}
-      <TouchableOpacity onPress={clearStorage} style={styles.clearStorageButton}>
+      <TouchableOpacity
+        onPress={clearStorage}
+        style={styles.clearStorageButton}
+      >
         <Text style={styles.clearStorageButtonText}>Clear AsyncStorage</Text>
       </TouchableOpacity>
     </View>
@@ -66,54 +85,54 @@ const LoginScreen = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#f5f5f5',
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#f5f5f5",
   },
   title: {
     fontSize: 24,
     marginBottom: 20,
-    fontWeight: 'bold',
-    color: '#333',
+    fontWeight: "bold",
+    color: "#333",
   },
   input: {
     borderWidth: 1,
-    borderColor: 'gray',
-    width: '80%',
+    borderColor: "gray",
+    width: "80%",
     padding: 10,
     marginBottom: 20,
     borderRadius: 5,
-    backgroundColor: '#fff',
+    backgroundColor: "#fff",
   },
   button: {
-    backgroundColor: '#4e9caf',
+    backgroundColor: "#4e9caf",
     padding: 15,
     borderRadius: 5,
-    width: '80%',
-    alignItems: 'center',
-    marginBottom: 10, 
+    width: "80%",
+    alignItems: "center",
+    marginBottom: 10,
   },
   buttonText: {
-    color: 'white',
+    color: "white",
     fontSize: 18,
   },
   createAccountButton: {
-    marginTop: 10, 
+    marginTop: 10,
   },
   createAccountButtonText: {
-    color: '#4e9caf',
+    color: "#4e9caf",
     fontSize: 16,
   },
   clearStorageButton: {
     marginTop: 10,
-    backgroundColor: '#ff6b6b',
+    backgroundColor: "#ff6b6b",
     padding: 15,
     borderRadius: 5,
-    width: '80%',
-    alignItems: 'center',
+    width: "80%",
+    alignItems: "center",
   },
   clearStorageButtonText: {
-    color: 'white',
+    color: "white",
     fontSize: 16,
   },
 });

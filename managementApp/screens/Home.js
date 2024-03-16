@@ -11,7 +11,7 @@ import {
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import { useNavigation } from "@react-navigation/native";
-import { useUser } from "./UserContext"; // Ensure this is correctly imported
+import { useUser } from "../data/UserContext"; // Ensure this is correctly imported
 import { format } from "date-fns";
 
 const HomeScreen = () => {
@@ -31,21 +31,28 @@ const HomeScreen = () => {
 
   const handleSubmit = async () => {
     if (!amount || !category) {
-      Alert.alert("Missing Information", "Please select a category and enter an amount.");
+      Alert.alert(
+        "Missing Information",
+        "Please select a category and enter an amount."
+      );
       return;
     }
-  
+
     // Convert the entered amount to a number for calculations
     const newExpenditureAmount = parseFloat(amount);
-    
+
     // Calculate the total expenditure for the selected category
     const totalExpenditureForCategory = user.expenditures
-      .filter(expense => expense.category === category)
-      .reduce((sum, currentExpense) => sum + parseFloat(currentExpense.amount.replace('£', '')), 0);
-  
+      .filter((expense) => expense.category === category)
+      .reduce(
+        (sum, currentExpense) =>
+          sum + parseFloat(currentExpense.amount.replace("£", "")),
+        0
+      );
+
     // Get the budget limit for the selected category
     const budgetLimit = parseFloat(user.budgets[category] || 0);
-  
+
     // Check if the new total exceeds the budget for the category
     if (totalExpenditureForCategory + newExpenditureAmount > budgetLimit) {
       Alert.alert(
@@ -55,19 +62,19 @@ const HomeScreen = () => {
           {
             text: "Cancel",
             onPress: () => console.log("Addition cancelled"),
-            style: "cancel"
+            style: "cancel",
           },
           {
             text: "Proceed",
-            onPress: () => proceedWithExpenditure()
-          }
+            onPress: () => proceedWithExpenditure(),
+          },
         ]
       );
     } else {
       proceedWithExpenditure();
     }
   };
-  
+
   const proceedWithExpenditure = async () => {
     const newExpenditure = {
       id: Date.now().toString(),
@@ -75,9 +82,9 @@ const HomeScreen = () => {
       category,
       dateTime: new Date().toISOString(),
     };
-  
+
     await addExpenditureForUser(newExpenditure);
-  
+
     // Reset state after adding
     setAmount("");
     setCategory(null);
@@ -93,30 +100,45 @@ const HomeScreen = () => {
         {
           text: "Cancel",
           onPress: () => console.log("Deletion cancelled"),
-          style: "cancel"
+          style: "cancel",
         },
         {
           text: "Delete",
           onPress: async () => {
             await deleteExpenditureForUser(id);
             // Optionally, you could add some UI feedback here, like a Toast message
-          }
-        }
+          },
+        },
       ]
     );
   };
 
   const calculateTotalExpenses = () => {
-    return user?.expenditures?.reduce((total, expense) => total + parseFloat(expense.amount.replace("£", "")), 0).toFixed(2) || '0';
+    return (
+      user?.expenditures
+        ?.reduce(
+          (total, expense) =>
+            total + parseFloat(expense.amount.replace("£", "")),
+          0
+        )
+        .toFixed(2) || "0"
+    );
   };
 
   const renderItem = ({ item }) => (
     <View style={styles.expenseItem}>
       <View style={styles.expenseDetails}>
-        <Text style={styles.expenseText}>{`${item.category}: ${item.amount}`}</Text>
-        <Text style={styles.expenseDate}>{format(new Date(item.dateTime), "Pp")}</Text>
+        <Text
+          style={styles.expenseText}
+        >{`${item.category}: ${item.amount}`}</Text>
+        <Text style={styles.expenseDate}>
+          {format(new Date(item.dateTime), "Pp")}
+        </Text>
       </View>
-      <TouchableOpacity onPress={() => handleDeleteExpense(item.id)} style={styles.deleteButtonContainer}>
+      <TouchableOpacity
+        onPress={() => handleDeleteExpense(item.id)}
+        style={styles.deleteButtonContainer}
+      >
         <Text style={styles.deleteButtonText}>Delete</Text>
       </TouchableOpacity>
     </View>
@@ -179,7 +201,9 @@ const HomeScreen = () => {
         style={styles.expensesList}
       />
       <View style={styles.totalExpensesContainer}>
-        <Text style={styles.totalExpensesText}>Total Spent: £{calculateTotalExpenses()}</Text>
+        <Text style={styles.totalExpensesText}>
+          Total Spent: £{calculateTotalExpenses()}
+        </Text>
       </View>
     </SafeAreaView>
   );

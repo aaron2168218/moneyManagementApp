@@ -1,5 +1,4 @@
-import React from "react";
-import { useEffect } from "react";
+import React, { useEffect } from "react";
 import {
   View,
   Text,
@@ -7,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
+  Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { useUser } from "../data/UserContext";
@@ -25,34 +25,31 @@ const ProfileScreen = () => {
     })();
   }, []);
 
-  const handleTakePhoto = async () => {
-    let result = await ImagePicker.launchCameraAsync({
-      allowsEditing: true,
-      aspect: [4, 3],
-      quality: 1,
-    });
-
-    if (!result.cancelled) {
-      updateUser({ ...user, avatarUrl: result.uri });
-    }
-  };
-
   const handleLogout = () => {
-    logout(); // This will log the user out
-    navigation.navigate("Login"); // Then it will navigate the user back to the login screen
+    Alert.alert("Log Out", "Are you sure you want to log out?", [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "Log Out",
+        onPress: () => {
+          logout();
+          navigation.navigate("Login");
+        },
+      },
+    ]);
   };
 
-  const userInfo = user || {
-    Username: "Rohan Patel",
-    avatarUrl:
-      "https://t4.ftcdn.net/jpg/00/64/67/27/360_F_64672736_U5kpdGs9keUll8CRQ3p3YaEv2M6qkVY5.jpg",
-  };
+  const avatarSource =
+    user?.avatarUrl ||
+    "https://t4.ftcdn.net/jpg/00/64/67/27/360_F_64672736_U5kpdGs9keUll8CRQ3p3YaEv2M6qkVY5.jpg";
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.profileContainer}>
-        <Image source={{ uri: user.avatarUrl }} style={styles.avatar} />
-        <Text style={styles.name}>{userInfo.Username}</Text>
+        <Image source={{ uri: avatarSource }} style={styles.avatar} />
+        <Text style={styles.name}>{user?.username || "Guest"}</Text>
         <View style={styles.buttonsContainer}>
           <TouchableOpacity
             onPress={() => navigation.navigate("EditProfile")}

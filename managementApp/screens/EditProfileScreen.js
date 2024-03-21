@@ -16,9 +16,10 @@ import { useNavigation } from "@react-navigation/native";
 const EditProfileScreen = () => {
   const navigation = useNavigation();
   const { user, updateUser } = useUser();
-  const [username, setUsername] = useState(user?.username || "");
+  // Use nullish coalescing operator to provide fallback values
+  const [username, setUsername] = useState(user?.username ?? "");
   const [password, setPassword] = useState("");
-  const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl);
+  const [avatarUrl, setAvatarUrl] = useState(user?.avatarUrl ?? "");
 
   const handleSave = async () => {
     if (!username.trim() || !password.trim()) {
@@ -60,7 +61,6 @@ const EditProfileScreen = () => {
     }
   };
 
-  // Function to handle cancel action
   const handleCancel = () => {
     navigation.goBack();
   };
@@ -71,10 +71,9 @@ const EditProfileScreen = () => {
         onPress={requestCameraPermissionAndUpdateAvatar}
         style={styles.avatarContainer}
       >
-        <Image source={{ uri: avatarUrl }} style={styles.avatar} />
+        <Image source={{ uri: avatarUrl || undefined }} style={styles.avatar} />
         <Text style={styles.editAvatarText}>Tap to Edit</Text>
       </TouchableOpacity>
-
       <View style={styles.inputContainer}>
         <Text style={styles.label}>Username</Text>
         <TextInput
@@ -85,7 +84,6 @@ const EditProfileScreen = () => {
           autoCapitalize="none"
         />
       </View>
-
       <View style={styles.inputContainer}>
         <Text style={styles.label}>New Password</Text>
         <TextInput
@@ -97,11 +95,9 @@ const EditProfileScreen = () => {
           autoCapitalize="none"
         />
       </View>
-
       <TouchableOpacity onPress={handleSave} style={styles.button}>
         <Text style={styles.buttonText}>Save Changes</Text>
       </TouchableOpacity>
-
       <TouchableOpacity
         onPress={handleCancel}
         style={[styles.button, styles.cancelButton]}

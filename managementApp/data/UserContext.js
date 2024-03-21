@@ -1,4 +1,13 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+// I used useCallBack hook and I got the idea of how to do it from this link:
+//www.youtube.com/watch?v=4Cf86qVEIJY
+
+import React, {
+  useCallback,
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+} from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const UserContext = createContext();
@@ -28,8 +37,8 @@ export const UserProvider = ({ children }) => {
     loadUsers();
   }, []);
 
-  const updateUser = async (updatedUser) => {
-    setUser(updateUser);
+  const updateUser = useCallback(async (updatedUser) => {
+    setUser(updatedUser);
     const users = await getUsersFromStorage();
     const userIndex = users.findIndex((u) => u.id === updatedUser.id);
     if (userIndex !== -1) {
@@ -39,7 +48,7 @@ export const UserProvider = ({ children }) => {
     } else {
       console.log("User not found.");
     }
-  };
+  });
 
   const logout = () => {
     setUser(null);

@@ -1,5 +1,8 @@
 // I used useCallBack hook and I got the idea of how to do it from this link:
 //www.youtube.com/watch?v=4Cf86qVEIJY
+// This is the youtube video I used to give me an idea of how to use Query in React native
+//www.youtube.com/watch?v=8K1N3fE-cDs
+//www.youtube.com/watch?v=XD0KYYQIlVA - This is in Hindi
 
 import React, {
   useCallback,

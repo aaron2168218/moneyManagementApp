@@ -1,22 +1,51 @@
-import React from "react";
-import { View, Text, Dimensions, StyleSheet, SafeAreaView } from "react-native";
+import React, { useContext, useEffect, useState } from "react";
+import { View, Text, StyleSheet, SafeAreaView } from "react-native";
 import { PieChart } from "react-native-chart-kit";
-import { LogExpense } from "../data/LogExpense";
+import { useUser } from "../data/UserContext";
+import { Dimensions } from "react-native";
 
 const screenWidth = Dimensions.get("window").width;
 
-const categoryColors = {
-  Food: "#FF5733",
-  Transport: "#C70039",
-  Utilities: "#900C3F",
-  Entertainment: "#581845",
-  Other: "#FFC300",
-};
-
-const getColorForCategory = (category) => categoryColors[category] || "#999999";
-
 const DataScreen = () => {
-  const { expenses } = LogExpense();
+  const { user } = useUser();
+  const [pieChartData, setPieChartData] = useState([]);
+
+  useEffect(() => {
+    if (user?.expenditures) {
+      const expensesByCategory = user.expenditures.reduce((acc, expense) => {
+        const amount = parseFloat(expense.amount.replace("£", ""));
+        if (acc[expense.category]) {
+          acc[expense.category] += amount;
+        } else {
+          acc[expense.category] = amount;
+        }
+        return acc;
+      }, {});
+
+      const chartData = Object.entries(expensesByCategory).map(
+        ([category, population]) => ({
+          name: category,
+          population,
+          color: getColorForCategory(category),
+          legendFontColor: "#7F7F7F",
+          legendFontSize: 15,
+        })
+      );
+
+      setPieChartData(chartData);
+    }
+  }, [user?.expenditures]);
+
+  const getColorForCategory = (category) => {
+    const categoryColors = {
+      Food: "#FF5733",
+      Transport: "#C70039",
+      Utilities: "#900C3F",
+      Entertainment: "#581845",
+      Other: "#FFC300",
+    };
+    return categoryColors[category] || "#999999";
+  };
 
   const chartConfig = {
     backgroundGradientFrom: "#fff",
@@ -32,26 +61,6 @@ const DataScreen = () => {
       stroke: "#ffa726",
     },
   };
-
-  const expensesByCategory = expenses.reduce((acc, expense) => {
-    const amount = parseFloat(expense.amount.replace("£", ""));
-    if (acc[expense.category]) {
-      acc[expense.category] += amount;
-    } else {
-      acc[expense.category] = amount;
-    }
-    return acc;
-  }, {});
-
-  const pieChartData = Object.entries(expensesByCategory).map(
-    ([category, population]) => ({
-      name: category,
-      population,
-      color: getColorForCategory(category),
-      legendFontColor: "#7F7F7F",
-      legendFontSize: 15,
-    })
-  );
 
   return (
     <SafeAreaView style={styles.container}>

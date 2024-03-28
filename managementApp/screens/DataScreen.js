@@ -110,24 +110,17 @@ const DataScreen = () => {
             chartConfig={chartConfig}
             accessor={"population"}
             backgroundColor={"transparent"}
-            paddingLeft={"15"}
+            paddingLeft={""}
             center={[screenWidth / 4, 10]}
             avoidFalseZero={true}
-            renderLegend={(legend) => (
-              <View style={styles.legend}>
-                {legend.map((item, index) => (
-                  <Text key={index} style={styles.legendText}>
-                    {`${item.name}: ${item.population}`}
-                  </Text>
-                ))}
-              </View>
-            )}
+
           />
+          
         ) : selectedChart === "bar" && barChartData.labels.length > 0 ? (
           <BarChart
             data={barChartData}
             width={screenWidth - 32}
-            height={220}
+            height={500}
             yAxisLabel={"£"}
             chartConfig={chartConfig}
             verticalLabelRotation={30}
@@ -149,6 +142,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#f5f5f5",
+    marginBottom: 10
   },
   header: {
     fontSize: 22,
@@ -192,6 +186,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
+    paddingRight: 30,
   },
   legend: {
     alignItems: "center",

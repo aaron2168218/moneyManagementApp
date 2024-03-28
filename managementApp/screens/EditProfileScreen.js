@@ -37,9 +37,28 @@ const EditProfileScreen = () => {
     }
   };
 
+  const updateAvatar = () => {
+    Alert.alert(
+      "Update Avatar",
+      "Choose how you would like to update your avatar.",
+      [
+        {
+          text: "Take Photo",
+          onPress: requestCameraPermissionAndUpdateAvatar,
+        },
+        {
+          text: "Choose from Gallery",
+          onPress: requestGalleryPermissionAndUpdateAvatar,
+        },
+        { text: "Cancel", style: "cancel" },
+      ],
+      { cancelable: true }
+    );
+  };
+
   const requestCameraPermissionAndUpdateAvatar = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== "granted") {
+    if (status !== 'granted') {
       Alert.alert(
         "Permission Denied",
         "Camera permission is required to change the avatar."
@@ -49,15 +68,44 @@ const EditProfileScreen = () => {
     takePhotoAndUpdateAvatar();
   };
 
+  const requestGalleryPermissionAndUpdateAvatar = async () => {
+    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== 'granted') {
+      Alert.alert(
+        "Permission Denied",
+        "Gallery permission is required to change the avatar."
+      );
+      return;
+    }
+    chooseFromGalleryAndUpdateAvatar();
+  };
+
   const takePhotoAndUpdateAvatar = async () => {
     let result = await ImagePicker.launchCameraAsync({
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.5,
     });
+  
+    if (!result.cancelled && result.assets) {
+      const uri = result.assets[0].uri;
+      console.log("Photo taken:", uri);
+      setAvatarUrl(uri);
+    }
+  };
 
-    if (!result.cancelled) {
-      setAvatarUrl(result.uri);
+  const chooseFromGalleryAndUpdateAvatar = async () => {
+    let result = await ImagePicker.launchImageLibraryAsync({
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 0.5,
+    });
+  
+    if (!result.cancelled && result.assets) {
+      // Access the first selected image's URI
+      const uri = result.assets[0].uri;
+      console.log("New image picked:", uri);
+      setAvatarUrl(uri);
     }
   };
 
@@ -68,10 +116,11 @@ const EditProfileScreen = () => {
   return (
     <View style={styles.container}>
       <TouchableOpacity
-        onPress={requestCameraPermissionAndUpdateAvatar}
+        onPress={updateAvatar}
         style={styles.avatarContainer}
       >
-        <Image source={{ uri: avatarUrl || undefined }} style={styles.avatar} />
+        <Image source={{ uri: avatarUrl + '?' + new Date().getTime() }} style={styles.avatar} />
+
         <Text style={styles.editAvatarText}>Tap to Edit</Text>
       </TouchableOpacity>
       <View style={styles.inputContainer}>

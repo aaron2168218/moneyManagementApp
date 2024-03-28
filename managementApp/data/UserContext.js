@@ -41,17 +41,19 @@ export const UserProvider = ({ children }) => {
   }, []);
 
   const updateUser = useCallback(async (updatedUser) => {
+    // Assuming 'setUser' updates the local state, reflecting changes immediately in the UI
     setUser(updatedUser);
+    
     const users = await getUsersFromStorage();
-    const userIndex = users.findIndex((u) => u.id === updatedUser.id);
+    const userIndex = users.findIndex(u => u.id === updatedUser.id);
+    
     if (userIndex !== -1) {
-      users[userIndex] = updatedUser; // This updates the user details
-      await saveUsersToStorage(users); // It then save the updated user array to storage
-      console.log("User updated successfully:", updatedUser);
+      users[userIndex] = updatedUser; // Update the user details in the array
+      await saveUsersToStorage(users); // Save the updated users array to AsyncStorage
     } else {
-      console.log("User not found.");
+      console.error("User not found in storage.");
     }
-  });
+  }, []);
 
   const logout = () => {
     setUser(null);

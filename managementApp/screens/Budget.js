@@ -8,7 +8,8 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  Alert // Import Alert for displaying popup messages
+  Alert,
+  TouchableOpacity,
 } from "react-native";
 import { useUser } from "../data/UserContext";
 
@@ -30,8 +31,8 @@ const Budget = () => {
   }, [user]);
 
   const handleChange = (name, value) => {
-    // If the value is empty, set it to "1000000000000000000"
-    const newValue = value.trim() === "" ? "1000000000000000000" : value;
+
+    const newValue = value.trim() === "" ? "" : value;
     setBudget((prevBudget) => ({
       ...prevBudget,
       [name]: newValue,
@@ -57,10 +58,10 @@ const Budget = () => {
       style={{ flex: 1 }}
     >
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Enter your budget</Text>
+        <Text style={styles.title}>Enter your budget in GBP</Text>
         {Object.keys(budget).map((category) => (
           <View key={category} style={styles.inputGroup}>
-            <Text>{category}</Text>
+            <Text style={{ fontWeight: "bold" }}>{category}</Text>
             <TextInput
               style={styles.input}
               onChangeText={(value) => handleChange(category, value)}
@@ -70,7 +71,9 @@ const Budget = () => {
             />
           </View>
         ))}
-        <Button title="Save" onPress={handleSubmit} />
+        <TouchableOpacity style={styles.saveButton} onPress={handleSubmit}>
+          <Text style={styles.saveButtonText}>Save</Text>
+        </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -81,20 +84,46 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: "center",
     padding: 20,
+    backgroundColor: "#f5f5f5", 
   },
   title: {
     fontSize: 24,
     marginBottom: 20,
+    color: "#333",
+    fontWeight: "bold",
+    textAlign: "center",
   },
   inputGroup: {
-    marginBottom: 10,
+    marginBottom: 20, 
+    backgroundColor: "#ffffff", 
+    borderRadius: 8,
+    padding: 10,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.23,
+    shadowRadius: 2.62,
+    elevation: 4, 
   },
   input: {
     borderWidth: 1,
     borderColor: "#ddd",
-    padding: 10,
-    marginBottom: 10,
+    padding: 15,
     borderRadius: 5,
+    fontSize: 16,
+    color: "#333", 
+    marginTop: 5, 
+  },
+  saveButton: {
+    backgroundColor: "#4e9caf", 
+    padding: 15,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 20,
+  },
+  saveButtonText: {
+    color: "#ffffff", 
+    fontSize: 18,
+    fontWeight: "bold",
   },
 });
 

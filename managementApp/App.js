@@ -12,6 +12,7 @@ import LoginScreen from "./screens/LoginScreen";
 import SignupScreen from "./screens/SignupScreen";
 import DataScreen from "./screens/DataScreen";
 import { UserProvider } from "./data/UserContext";
+import SearchScreen from "./screens/SearchScreen";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +24,7 @@ function MainApp() {
     <Tab.Navigator>
       <Tab.Screen name="Home" component={Home} />
       <Tab.Screen name="Budget" component={Budget} />
+      <Tab.Screen name="Search" component={SearchScreen} />
       <Tab.Screen name="Data" component={DataScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />
     </Tab.Navigator>
@@ -40,6 +42,7 @@ export default function App() {
             <Stack.Screen name="Main" component={MainApp} />
             <Stack.Screen name="Profile" component={ProfileScreen} />
             <Stack.Screen name="EditProfile" component={EditProfileScreen} />
+            <Tab.Screen name="Search" component={SearchScreen} />
           </Stack.Navigator>
           <StatusBar style="auto" />
         </NavigationContainer>

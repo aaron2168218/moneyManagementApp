@@ -22,6 +22,11 @@ const HomeScreen = () => {
   const [open, setOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
+  const [currencyRates, setCurrencyRates] = useState({});
+const [selectedCurrency, setSelectedCurrency] = useState("GBP");
+const [currencyLoading, setCurrencyLoading] = useState(false);
+const [currencyError, setCurrencyError] = useState(null);
+const [currencyItems, setCurrencyItems] = useState([]);
   
   
 
@@ -29,11 +34,19 @@ const HomeScreen = () => {
   const { user, addExpenditureForUser, updateExpenditureForUser, deleteExpenditureForUser } = useUser();
 
   useEffect(() => {
-    if (user && user.expenditures) {
-      setAmount('');
-      setCategory(null);
-    }
-  }, [user]);
+    setCurrencyLoading(true);
+    fetch("https://api.freecurrencyapi.com/v1/latest?apikey=fca_live_9jnO6Tn8FJ8jnGiqb8WxDoleUJaefftcHt0m4N0n")
+      .then((response) => response.json())
+      .then((data) => {
+        setCurrencyRates(data.data);
+        setCurrencyLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching currency rates:", error);
+        setCurrencyError(error);
+        setCurrencyLoading(false);
+      });
+  }, []);
 
   const handleAmountChange = (input) => {
     if (input.match(/^\d*\.?\d{0,2}$/)) {
@@ -75,6 +88,7 @@ const HomeScreen = () => {
       );
       return;
     }
+
 
 
 
@@ -131,7 +145,7 @@ const HomeScreen = () => {
     setOpen(false);
   };
 
-  // This function can remain unchanged if it uses a local state
+
   const handleDeleteExpense = async (id) => {
     Alert.alert(
       "Delete Expenditure",
@@ -146,7 +160,7 @@ const HomeScreen = () => {
           text: "Delete",
           onPress: async () => {
             await deleteExpenditureForUser(id);
-            // Optionally, you could add some UI feedback here, like a Toast message
+         
           },
         },
       ]
@@ -165,11 +179,22 @@ const HomeScreen = () => {
     );
   };
 
+  const categoryColors = {
+    Food: "#FFFACD", // LemonChiffon
+    Transport: "#FFDAB9", // PeachPuff
+    Utilities: "#B0E0E6", // PowderBlue
+    Entertainment: "#98FB98", // PaleGreen
+    Other: "#D8BFD8", // Thistle
+  };
+
   const renderItem = ({ item }) => (
-    <View style={styles.expenseItem}>
+    <View style={[styles.expenseItem, { backgroundColor: categoryColors[item.category] || "#fff" }]}>
       <View style={styles.expenseDetails}>
-        <Text style={styles.expenseText}>{`${item.category}: ${item.amount}`}</Text>
+        <Text style={styles.expenseText}>{`${item.category}`}</Text>
         <Text style={styles.expenseDate}>{format(new Date(item.dateTime), "Pp")}</Text>
+      </View>
+      <View style={styles.expenseDetails}>
+        <Text style={styles.expenseText}>{`Amount: ${convertCurrency(item.amount.replace("£", ""), selectedCurrency)}`}</Text>
       </View>
       <TouchableOpacity onPress={() => handleEditExpense(item)} style={styles.editButtonContainer}>
         <Text style={styles.editButtonText}>Edit</Text>
@@ -180,6 +205,13 @@ const HomeScreen = () => {
     </View>
   );
   const dropdownHeight = 40 * 5;
+  const convertCurrency = (amount, currency) => {
+    if (currency === "GBP" || !currencyRates[currency]) {
+      return `£${amount}`;
+    }
+    const convertedAmount = (parseFloat(amount) * currencyRates[currency]).toFixed(2);
+    return `${convertedAmount} ${currency}`;
+  };
 
 
   return (
@@ -187,6 +219,14 @@ const HomeScreen = () => {
       <View style={styles.headerContainer}>
         <Text style={styles.header}>Expenditure Tracker</Text>
       </View>
+      <TextInput
+    style={styles.input}
+    onChangeText={setSelectedCurrency}
+    value={selectedCurrency}
+    placeholder="Enter Currency (e.g., USD)"
+    keyboardType="default"
+    placeholderTextColor="#666"
+  />
   
       {isEditing ? (
         <View style={styles.editContainer}>
@@ -194,7 +234,7 @@ const HomeScreen = () => {
             style={styles.input}
             onChangeText={handleAmountChange}
             value={amount}
-            placeholder="Enter amount (£)"
+            placeholder="Enter amount"
             keyboardType="numeric"
             placeholderTextColor="#666"
           />
@@ -235,7 +275,7 @@ const HomeScreen = () => {
             style={styles.input}
             onChangeText={handleAmountChange}
             value={amount}
-            placeholder="Enter amount (£)"
+            placeholder="Enter amount "
             keyboardType="numeric"
             placeholderTextColor="#666"
           />

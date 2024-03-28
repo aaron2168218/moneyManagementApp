@@ -48,7 +48,6 @@ const Budget = () => {
     }
     console.log("Budget saved:", budget);
 
-    // Display a popup message indicating that the budget has been saved
     Alert.alert("Budget Saved", "Your budget has been saved successfully.");
   };
 

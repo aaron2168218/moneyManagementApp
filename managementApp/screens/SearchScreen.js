@@ -25,6 +25,7 @@ const onDateChange = (event, selectedDate) => {
   const currentDate = selectedDate || date;
   setShowDatePicker(Platform.OS === 'ios');
   setDate(currentDate);
+  // Update the date query for filtering
   setDateQuery(format(currentDate, 'yyyy-MM-dd'));
 };
 
@@ -64,6 +65,12 @@ const onDateChange = (event, selectedDate) => {
         keyboardType="default"
         placeholderTextColor="#666"
       />
+      <TouchableOpacity
+  style={styles.datePickerButton}
+  onPress={() => setShowDatePicker(true)}
+>
+  <Text style={styles.datePickerButtonText}>Select Date</Text>
+</TouchableOpacity>
  
 {showDatePicker && (
   <DateTimePicker
@@ -86,6 +93,12 @@ const onDateChange = (event, selectedDate) => {
 
 
 const styles = StyleSheet.create({
+  datePickerButton: {
+    // Style your button
+  },
+  datePickerButtonText: {
+    // Text styling
+  },
   container: {
     flex: 1,
     backgroundColor: "#f5f5f5",

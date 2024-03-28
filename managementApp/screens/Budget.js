@@ -1,5 +1,15 @@
-import React, { useState, useEffect, useContext } from "react";
-import { View, Text, TextInput, Button, StyleSheet } from "react-native";
+import React, { useState, useEffect } from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  Button,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Alert // Import Alert for displaying popup messages
+} from "react-native";
 import { useUser } from "../data/UserContext";
 
 const Budget = () => {
@@ -20,9 +30,11 @@ const Budget = () => {
   }, [user]);
 
   const handleChange = (name, value) => {
+    // If the value is empty, set it to "1000000000000000000"
+    const newValue = value.trim() === "" ? "1000000000000000000" : value;
     setBudget((prevBudget) => ({
       ...prevBudget,
-      [name]: value,
+      [name]: newValue,
     }));
   };
 
@@ -34,30 +46,39 @@ const Budget = () => {
       }
     }
     console.log("Budget saved:", budget);
+
+    // Display a popup message indicating that the budget has been saved
+    Alert.alert("Budget Saved", "Your budget has been saved successfully.");
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Enter your budget</Text>
-      {Object.keys(budget).map((category) => (
-        <View key={category} style={styles.inputGroup}>
-          <Text>{category}</Text>
-          <TextInput
-            style={styles.input}
-            onChangeText={(value) => handleChange(category, value)}
-            value={budget[category]}
-            keyboardType="numeric"
-          />
-        </View>
-      ))}
-      <Button title="Save" onPress={handleSubmit} />
-    </View>
+    <KeyboardAvoidingView
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={{ flex: 1 }}
+    >
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.title}>Enter your budget</Text>
+        {Object.keys(budget).map((category) => (
+          <View key={category} style={styles.inputGroup}>
+            <Text>{category}</Text>
+            <TextInput
+              style={styles.input}
+              onChangeText={(value) => handleChange(category, value)}
+              value={budget[category]}
+              keyboardType="numeric"
+              placeholder="£"
+            />
+          </View>
+        ))}
+        <Button title="Save" onPress={handleSubmit} />
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     justifyContent: "center",
     padding: 20,
   },

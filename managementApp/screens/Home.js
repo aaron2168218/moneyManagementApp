@@ -8,24 +8,62 @@ import {
   SafeAreaView,
   FlatList,
   Alert,
+  Modal,
 } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import { useNavigation } from "@react-navigation/native";
-import { useUser } from "../data/UserContext"; // Ensure this is correctly imported
+import { useUser } from "../data/UserContext";
 import { format } from "date-fns";
+
 
 const HomeScreen = () => {
   const [amount, setAmount] = useState("");
   const [category, setCategory] = useState(null);
   const [open, setOpen] = useState(false);
-  const navigation = useNavigation();
-  const { user, addExpenditureForUser, deleteExpenditureForUser } = useUser(); // Use addExpenditureForUser from UserContext
+  const [isEditing, setIsEditing] = useState(false);
+  const [editingItem, setEditingItem] = useState(null);
+  
+  
 
-  // Since budgets are now part of the user data, there's no need to fetch them from useBudget
+  const navigation = useNavigation();
+  const { user, addExpenditureForUser, updateExpenditureForUser, deleteExpenditureForUser } = useUser();
+
+  useEffect(() => {
+    if (user && user.expenditures) {
+      setAmount('');
+      setCategory(null);
+    }
+  }, [user]);
 
   const handleAmountChange = (input) => {
     if (input.match(/^\d*\.?\d{0,2}$/)) {
       setAmount(input);
+    }
+  };
+
+  const handleEditExpense = (item) => {
+    setEditingItem(item);
+    setAmount(item.amount.replace("£", ""));
+    setCategory(item.category);
+    setIsEditing(true);
+  };
+
+  const handleUpdateExpense = async () => {
+    if (editingItem && amount && category) {
+      const updatedExpenditure = {
+        ...editingItem,
+        amount: `£${amount}`,
+        category,
+      };
+  
+      await updateExpenditureForUser(user.id, updatedExpenditure);
+      setIsEditing(false);
+      setEditingItem(null);
+      setAmount("");
+      setCategory(null);
+      setOpen(false);
+    } else {
+      Alert.alert("Error", "Please make sure all fields are filled.");
     }
   };
 
@@ -37,6 +75,8 @@ const HomeScreen = () => {
       );
       return;
     }
+
+
 
     // Convert the entered amount to a number for calculations
     const newExpenditureAmount = parseFloat(amount);
@@ -128,88 +168,136 @@ const HomeScreen = () => {
   const renderItem = ({ item }) => (
     <View style={styles.expenseItem}>
       <View style={styles.expenseDetails}>
-        <Text
-          style={styles.expenseText}
-        >{`${item.category}: ${item.amount}`}</Text>
-        <Text style={styles.expenseDate}>
-          {format(new Date(item.dateTime), "Pp")}
-        </Text>
+        <Text style={styles.expenseText}>{`${item.category}: ${item.amount}`}</Text>
+        <Text style={styles.expenseDate}>{format(new Date(item.dateTime), "Pp")}</Text>
       </View>
-      <TouchableOpacity
-        onPress={() => handleDeleteExpense(item.id)}
-        style={styles.deleteButtonContainer}
-      >
+      <TouchableOpacity onPress={() => handleEditExpense(item)} style={styles.editButtonContainer}>
+        <Text style={styles.editButtonText}>Edit</Text>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => handleDeleteExpense(item.id)} style={styles.deleteButtonContainer}>
         <Text style={styles.deleteButtonText}>Delete</Text>
       </TouchableOpacity>
     </View>
   );
+  const dropdownHeight = 40 * 5;
+
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.headerContainer}>
-        <Text style={styles.header}>Log New Expenditure</Text>
+        <Text style={styles.header}>Expenditure Tracker</Text>
       </View>
-      <TextInput
-        style={styles.input}
-        onChangeText={handleAmountChange}
-        value={amount}
-        placeholder="Enter amount (£)"
-        keyboardType="numeric"
-        placeholderTextColor="#666"
-        accessibilityLabel="Amount Input"
-        returnKeyType="done"
-      />
-      <DropDownPicker
-        open={open}
-        value={category}
-        items={[
-          { label: "Food", value: "Food" },
-          { label: "Transport", value: "Transport" },
-          { label: "Utilities", value: "Utilities" },
-          { label: "Entertainment", value: "Entertainment" },
-          { label: "Other", value: "Other" },
-        ]}
-        setOpen={setOpen}
-        setValue={setCategory}
-        setItems={() => {}}
-        zIndex={3000}
-        zIndexInverse={1000}
-        containerStyle={styles.dropdownContainer}
-        style={styles.dropdown}
-        dropDownContainerStyle={styles.dropdownBox}
-        placeholder="Select Category"
-        placeholderStyle={{ color: "#666" }}
-        accessibilityLabel="Category Dropdown"
-      />
-      <TouchableOpacity
-        style={styles.button}
-        onPress={handleSubmit}
-        disabled={!amount || !category}
-      >
-        <Text style={styles.buttonText}>Add Expense</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.viewDataButton}
-        onPress={() => navigation.navigate("Data")}
-      >
-        <Text style={styles.viewDataButtonText}>View Data</Text>
-      </TouchableOpacity>
+  
+      {isEditing ? (
+        <View style={styles.editContainer}>
+          <TextInput
+            style={styles.input}
+            onChangeText={handleAmountChange}
+            value={amount}
+            placeholder="Enter amount (£)"
+            keyboardType="numeric"
+            placeholderTextColor="#666"
+          />
+           
+           <DropDownPicker
+              open={open}
+              value={category}
+              items={[
+                { label: "Food", value: "Food" },
+                { label: "Transport", value: "Transport" },
+                { label: "Utilities", value: "Utilities" },
+                { label: "Entertainment", value: "Entertainment" },
+                { label: "Other", value: "Other" },
+              ]}
+              setOpen={setOpen}
+              setValue={setCategory}
+              setItems={() => {}}
+              zIndex={3000}
+              zIndexInverse={1000}
+              containerStyle={styles.dropdownContainer}
+              style={styles.dropdown}
+              dropDownContainerStyle={styles.dropdownBox}
+              placeholder="Select Category"
+              placeholderStyle={{ color: "#666" }}
+            />
+
+            <View style={{ height: open ? dropdownHeight : 0 }}></View>
+          <TouchableOpacity style={styles.button} onPress={handleUpdateExpense}>
+            <Text style={styles.buttonText}>Update Expense</Text>
+          </TouchableOpacity>
+          <TouchableOpacity style={styles.cancelButton} onPress={() => setIsEditing(false)}>
+            <Text style={styles.cancelButtonText}>Cancel</Text>
+          </TouchableOpacity>
+        </View>
+      ) : (
+        <View style={styles.newExpenseContainer}>
+          <TextInput
+            style={styles.input}
+            onChangeText={handleAmountChange}
+            value={amount}
+            placeholder="Enter amount (£)"
+            keyboardType="numeric"
+            placeholderTextColor="#666"
+          />
+            <DropDownPicker
+              open={open}
+              value={category}
+              items={[
+                { label: "Food", value: "Food" },
+                { label: "Transport", value: "Transport" },
+                { label: "Utilities", value: "Utilities" },
+                { label: "Entertainment", value: "Entertainment" },
+                { label: "Other", value: "Other" },
+              ]}
+              setOpen={setOpen}
+              setValue={setCategory}
+              setItems={() => {}}
+              zIndex={3000}
+              zIndexInverse={1000}
+              containerStyle={styles.dropdownContainer}
+              style={styles.dropdown}
+              dropDownContainerStyle={styles.dropdownBox}
+              placeholder="Select Category"
+              placeholderStyle={{ color: "#666" }}
+            />
+
+            <View style={{ height: open ? dropdownHeight : 0 }}></View>
+          <TouchableOpacity style={styles.button} onPress={handleSubmit} disabled={!amount || !category}>
+            <Text style={styles.buttonText}>Add Expense</Text>
+          </TouchableOpacity>
+        </View>
+      )}
+  
       <FlatList
-        data={user?.expenditures || []} // Use user's expenditures directly
+        data={user?.expenditures || []}
         renderItem={renderItem}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id.toString()}
         style={styles.expensesList}
       />
+  
       <View style={styles.totalExpensesContainer}>
-        <Text style={styles.totalExpensesText}>
-          Total Spent: £{calculateTotalExpenses()}
-        </Text>
+        <Text style={styles.totalExpensesText}>Total Spent: £{calculateTotalExpenses()}</Text>
       </View>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  editButtonContainer: {
+    justifyContent: "center",
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    backgroundColor: "orange",
+    borderRadius: 5,
+
+  },
+  editButtonText: {
+    color: "#fff",
+    fontWeight: "bold",
+  },
+  editContainer: {
+
+  },
   container: {
     flex: 1,
     backgroundColor: "#f5f5f5",

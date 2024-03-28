@@ -13,7 +13,8 @@ const DataScreen = () => {
   useEffect(() => {
     if (user?.expenditures) {
       const expensesByCategory = user.expenditures.reduce((acc, expense) => {
-        const amount = parseFloat(expense.amount.replace("£", ""));
+        const amountAsString = String(expense.amount);
+        const amount = parseFloat(amountAsString.replace("£", ""));
         if (acc[expense.category]) {
           acc[expense.category] += amount;
         } else {
@@ -21,20 +22,21 @@ const DataScreen = () => {
         }
         return acc;
       }, {});
-
+  
       const chartData = Object.entries(expensesByCategory).map(
-        ([category, population]) => ({
+        ([category, amount]) => ({
           name: category,
-          population,
+          population: amount,
           color: getColorForCategory(category),
           legendFontColor: "#7F7F7F",
           legendFontSize: 15,
         })
       );
-
+  
       setPieChartData(chartData);
     }
   }, [user?.expenditures]);
+
 
   const getColorForCategory = (category) => {
     const categoryColors = {
@@ -44,7 +46,9 @@ const DataScreen = () => {
       Entertainment: "#581845",
       Other: "#FFC300",
     };
-    return categoryColors[category] || "#999999";
+    const color = categoryColors[category] || "#999999";
+    console.log(`Color for ${category}: ${color}`); // Add this line for debugging
+    return color;
   };
 
   const chartConfig = {

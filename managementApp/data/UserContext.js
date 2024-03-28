@@ -128,6 +128,29 @@ export const UserProvider = ({ children }) => {
     }
   };
 
+  const updateExpenditureForUser = async (userId, updatedExpenditure) => {
+    const users = await getUsersFromStorage();
+    const userIndex = users.findIndex((u) => u.id === userId);
+    if (userIndex !== -1) {
+      const expenditureIndex = users[userIndex].expenditures.findIndex(
+        (ex) => ex.id === updatedExpenditure.id
+      );
+      if (expenditureIndex !== -1) {
+        users[userIndex].expenditures[expenditureIndex] = updatedExpenditure;
+        await saveUsersToStorage(users);
+        // Update the local user state if the updated expenditure is for the current user
+        if (user?.id === userId) {
+          setUser({ ...users[userIndex] });
+        }
+        console.log("Expenditure updated successfully:", updatedExpenditure);
+      } else {
+        console.log("Expenditure not found.");
+      }
+    } else {
+      console.log("User not found.");
+    }
+  };
+
   return (
     <UserContext.Provider
       value={{
@@ -140,6 +163,7 @@ export const UserProvider = ({ children }) => {
         addExpenditureForUser,
         findUserByUsernameAndPassword,
         deleteExpenditureForUser,
+        updateExpenditureForUser
       }}
     >
       {children}

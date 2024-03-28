@@ -6,6 +6,9 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage"; // Import AsyncStorage
 import { useUser } from "../data/UserContext"; // Adjust the path as necessary
@@ -45,14 +48,19 @@ const LoginScreen = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Login to My Budget App</Text>
-      <TextInput
-        placeholder="Username"
-        value={username}
-        onChangeText={setUsername}
-        style={styles.input}
-      />
+    <KeyboardAvoidingView 
+    behavior={Platform.OS === "ios" ? "padding" : "height"} 
+    style={styles.container}
+  >
+    <ScrollView contentContainerStyle={styles.scrollViewContent}>
+      <View style={styles.inner}>
+        <Text style={styles.title}>Login to My Budget App</Text>
+        <TextInput
+          placeholder="Username"
+          value={username}
+          onChangeText={setUsername}
+          style={styles.input}
+        />
       <TextInput
         placeholder="Password"
         value={password}
@@ -79,15 +87,26 @@ const LoginScreen = ({ navigation }) => {
         <Text style={styles.clearStorageButtonText}>Clear AsyncStorage</Text>
       </TouchableOpacity>
     </View>
+    </ScrollView>
+    </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#f5f5f5",
+  },
+  scrollViewContent: {
+    flexGrow: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f5f5f5",
+  },
+  inner: {
+    flex: 1,
+    justifyContent: "center",
+    width: "100%",
+    alignItems: "center",
   },
   title: {
     fontSize: 24,

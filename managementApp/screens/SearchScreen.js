@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   View,
   Text,
@@ -7,27 +7,26 @@ import {
   SafeAreaView,
   FlatList,
   TouchableOpacity,
-  Platform
-} from 'react-native';
-import { useUser } from '../data/UserContext';
-import { format } from 'date-fns';
-import DateTimePicker from '@react-native-community/datetimepicker';
-
+  Platform,
+} from "react-native";
+import { useUser } from "../data/UserContext";
+import { format } from "date-fns";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import { Ionicons } from "@expo/vector-icons";
 
 const SearchScreen = () => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [dateQuery, setDateQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
+  const [dateQuery, setDateQuery] = useState("");
   const { user } = useUser();
   const [date, setDate] = useState(new Date());
-const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false);
 
-const onDateChange = (event, selectedDate) => {
-  const currentDate = selectedDate || date;
-  setShowDatePicker(Platform.OS === 'ios');
-  setDate(currentDate);
-  // Update the date query for filtering
-  setDateQuery(format(currentDate, 'yyyy-MM-dd'));
-};
+  const onDateChange = (event, selectedDate) => {
+    const currentDate = selectedDate || date;
+    setShowDatePicker(Platform.OS === "ios");
+    setDate(currentDate);
+    setDateQuery(format(currentDate, "yyyy-MM-dd"));
+  };
 
   const filteredExpenses = user?.expenditures.filter((expense) => {
     const matchesCategoryOrAmount =
@@ -36,7 +35,7 @@ const onDateChange = (event, selectedDate) => {
 
     let matchesDate = true;
     if (dateQuery) {
-      const expenseDate = format(new Date(expense.dateTime), 'yyyy-MM-dd');
+      const expenseDate = format(new Date(expense.dateTime), "yyyy-MM-dd");
       matchesDate = expenseDate.includes(dateQuery);
     }
 
@@ -44,11 +43,13 @@ const onDateChange = (event, selectedDate) => {
   });
 
   const renderItem = ({ item }) => (
-    <View style={[styles.expenseItem, { backgroundColor: "#f5f5f5" }]}>
-      <View style={styles.expenseDetails}>
-        <Text style={styles.expenseText}>{`${item.category}: ${item.amount}`}</Text>
-        <Text style={styles.expenseDate}>{format(new Date(item.dateTime), "Pp")}</Text>
-      </View>
+    <View style={styles.expenseItem}>
+      <Text
+        style={styles.expenseText}
+      >{`${item.category}: ${item.amount}`}</Text>
+      <Text style={styles.expenseDate}>
+        {format(new Date(item.dateTime), "Pp")}
+      </Text>
     </View>
   );
 
@@ -56,31 +57,29 @@ const onDateChange = (event, selectedDate) => {
     <SafeAreaView style={styles.container}>
       <View style={styles.headerContainer}>
         <Text style={styles.header}>Expense Search</Text>
+        <TextInput
+          style={styles.input}
+          onChangeText={setSearchQuery}
+          value={searchQuery}
+          placeholder="Search by category or amount"
+          placeholderTextColor="#666"
+        />
+        <TouchableOpacity
+          style={styles.datePickerButton}
+          onPress={() => setShowDatePicker(true)}
+        >
+          <Text style={styles.datePickerButtonText}>Select Date</Text>
+        </TouchableOpacity>
+        {showDatePicker && (
+          <DateTimePicker
+            testID="dateTimePicker"
+            value={date}
+            mode="date"
+            display="default"
+            onChange={onDateChange}
+          />
+        )}
       </View>
-      <TextInput
-        style={styles.input}
-        onChangeText={setSearchQuery}
-        value={searchQuery}
-        placeholder="Search by category or amount"
-        keyboardType="default"
-        placeholderTextColor="#666"
-      />
-      <TouchableOpacity
-  style={styles.datePickerButton}
-  onPress={() => setShowDatePicker(true)}
->
-  <Text style={styles.datePickerButtonText}>Select Date</Text>
-</TouchableOpacity>
- 
-{showDatePicker && (
-  <DateTimePicker
-    testID="dateTimePicker"
-    value={date}
-    mode="date"
-    display="default"
-    onChange={onDateChange}
-  />
-)}
       <FlatList
         data={filteredExpenses || []}
         renderItem={renderItem}
@@ -91,21 +90,14 @@ const onDateChange = (event, selectedDate) => {
   );
 };
 
-
 const styles = StyleSheet.create({
-  datePickerButton: {
-    // Style your button
-  },
-  datePickerButtonText: {
-    // Text styling
-  },
   container: {
     flex: 1,
     backgroundColor: "#f5f5f5",
   },
   headerContainer: {
-    padding: 20,
-    paddingBottom: 10,
+    paddingVertical: 20,
+    paddingHorizontal: 20,
     backgroundColor: "#4e9caf",
     borderBottomLeftRadius: 20,
     borderBottomRightRadius: 20,
@@ -115,66 +107,57 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#fff",
     textAlign: "center",
+    marginBottom: 10,
   },
   input: {
     height: 50,
     borderWidth: 1,
     borderColor: "#ddd",
-    padding: 10,
-    margin: 20,
-    borderRadius: 8,
+    borderRadius: 25,
+    padding: 15,
     fontSize: 16,
     backgroundColor: "#fff",
+    marginBottom: 10,
+  },
+  datePickerButton: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 12,
+    paddingHorizontal: 30,
+    borderRadius: 25,
+    backgroundColor: "#4e9caf",
+    marginBottom: 20,
+  },
+  datePickerButtonText: {
+    fontSize: 16,
+    color: "#fff",
+    fontWeight: "bold",
   },
   expensesList: {
-    flex: 1,
+    marginTop: 10,
   },
   expenseItem: {
     flexDirection: "row",
     justifyContent: "space-between",
-    padding: 15,
+    padding: 20,
     marginHorizontal: 20,
     marginVertical: 5,
     backgroundColor: "#fff",
-    borderRadius: 8,
+    borderRadius: 15,
     elevation: 1,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 3.84,
   },
-  expenseDetails: {
-    flex: 1,
-  },
   expenseText: {
     color: "#333",
     fontSize: 16,
+    fontWeight: "bold",
   },
   expenseDate: {
-    fontSize: 14,
     color: "#666",
-  },
-  editButtonContainer: {
-    justifyContent: "center",
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    backgroundColor: "orange",
-    borderRadius: 5,
-  },
-  editButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
-  deleteButtonContainer: {
-    justifyContent: "center",
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    backgroundColor: "#ff6b6b",
-    borderRadius: 5,
-  },
-  deleteButtonText: {
-    color: "#fff",
-    fontWeight: "bold",
+    fontSize: 14,
   },
 });
 

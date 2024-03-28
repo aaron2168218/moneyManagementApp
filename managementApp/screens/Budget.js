@@ -31,7 +31,6 @@ const Budget = () => {
   }, [user]);
 
   const handleChange = (name, value) => {
-
     const newValue = value.trim() === "" ? "" : value;
     setBudget((prevBudget) => ({
       ...prevBudget,
@@ -83,7 +82,7 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     justifyContent: "center",
     padding: 20,
-    backgroundColor: "#f5f5f5", 
+    backgroundColor: "#f5f5f5",
   },
   title: {
     fontSize: 24,
@@ -93,15 +92,15 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   inputGroup: {
-    marginBottom: 20, 
-    backgroundColor: "#ffffff", 
+    marginBottom: 20,
+    backgroundColor: "#ffffff",
     borderRadius: 8,
     padding: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.23,
     shadowRadius: 2.62,
-    elevation: 4, 
+    elevation: 4,
   },
   input: {
     borderWidth: 1,
@@ -109,18 +108,18 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 5,
     fontSize: 16,
-    color: "#333", 
-    marginTop: 5, 
+    color: "#333",
+    marginTop: 5,
   },
   saveButton: {
-    backgroundColor: "#4e9caf", 
+    backgroundColor: "#4e9caf",
     padding: 15,
     borderRadius: 8,
     alignItems: "center",
     marginTop: 20,
   },
   saveButtonText: {
-    color: "#ffffff", 
+    color: "#ffffff",
     fontSize: 18,
     fontWeight: "bold",
   },

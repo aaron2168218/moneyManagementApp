@@ -13,6 +13,7 @@ import SignupScreen from "./screens/SignupScreen";
 import DataScreen from "./screens/DataScreen";
 import { UserProvider } from "./data/UserContext";
 import SearchScreen from "./screens/SearchScreen";
+import { Ionicons } from "@expo/vector-icons";
 
 const queryClient = new QueryClient();
 
@@ -21,7 +22,30 @@ const Stack = createStackNavigator();
 
 function MainApp() {
   return (
-    <Tab.Navigator>
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        tabBarIcon: ({ focused, color, size }) => {
+          let iconName;
+
+          if (route.name === "Home") {
+            iconName = focused ? "home" : "home-outline";
+          } else if (route.name === "Budget") {
+            iconName = focused ? "wallet" : "wallet-outline";
+          } else if (route.name === "Search") {
+            iconName = focused ? "search" : "search-outline";
+          } else if (route.name === "Data") {
+            iconName = focused ? "analytics" : "analytics-outline";
+          } else if (route.name === "Profile") {
+            iconName = focused ? "person" : "person-outline";
+          }
+
+          return <Ionicons name={iconName} size={size} color={color} />;
+        },
+        tabBarActiveTintColor: "tomato",
+        tabBarInactiveTintColor: "gray",
+        tabBarStyle: [{ display: "flex" }, null],
+      })}
+    >
       <Tab.Screen name="Home" component={Home} />
       <Tab.Screen name="Budget" component={Budget} />
       <Tab.Screen name="Search" component={SearchScreen} />

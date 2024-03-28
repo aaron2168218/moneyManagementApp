@@ -79,6 +79,11 @@ const DataScreen = () => {
     setSelectedChart(chartType);
   };
 
+  const totalExpenses = pieChartData.reduce(
+    (acc, data) => acc + data.population,
+    0
+  );
+
   const renderBarChartLegend = () => {
     return (
       <View style={styles.legend}>
@@ -187,6 +192,11 @@ const DataScreen = () => {
             <Text style={styles.noDataText}>No data available</Text>
           )}
         </View>
+        <View style={styles.totalContainer}>
+          <Text style={styles.totalText}>
+            Total Expenses: £{totalExpenses.toFixed(2)}
+          </Text>
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -203,6 +213,15 @@ const styles = StyleSheet.create({
     marginTop: 20,
     marginBottom: 10,
     textAlign: "center",
+  },
+  totalContainer: {
+    alignItems: "center",
+    paddingVertical: 20,
+  },
+  totalText: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#333",
   },
   buttonContainer: {
     flexDirection: "row",

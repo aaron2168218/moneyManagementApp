@@ -164,14 +164,14 @@ const DataScreen = () => {
             <>
               <BarChart
                 data={{
-                  labels: [],
+                  labels: barChartData.labels,
                   datasets: [
                     {
                       data: barChartData.datasets[0].data,
                     },
                   ],
                 }}
-                width={screenWidth - 64}
+                width={screenWidth - 64 + 25}
                 height={220}
                 yAxisLabel={"£"}
                 chartConfig={{

@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   Dimensions,
   SafeAreaView,
+  ScrollView,
   StyleSheet,
 } from "react-native";
 import { PieChart, BarChart } from "react-native-chart-kit";
@@ -36,6 +37,7 @@ const DataScreen = () => {
         color: getColorForCategory(category),
         legendFontColor: "#7F7F7F",
         legendFontSize: 15,
+        label: "",
       }));
 
       setPieChartData(pieData);
@@ -68,79 +70,111 @@ const DataScreen = () => {
     labelColor: (opacity = 1) => `rgba(0, 0, 0, ${opacity})`,
     barPercentage: 0.7,
     useShadowColorFromDataset: false,
+    style: {
+      borderRadius: 16,
+    },
   };
 
   const toggleChart = (chartType) => {
     setSelectedChart(chartType);
   };
 
+  const renderCustomLegend = (pieData) => {
+    return (
+      <View style={styles.legend}>
+        {pieData.map((slice, index) => (
+          <View key={index} style={styles.legendItem}>
+            <View
+              style={[styles.legendIndicator, { backgroundColor: slice.color }]}
+            />
+            <Text style={styles.legendText}>{`${
+              slice.name
+            }: £${slice.population.toFixed(2)}`}</Text>
+          </View>
+        ))}
+      </View>
+    );
+  };
+
   return (
     <SafeAreaView style={styles.container}>
-      <Text style={styles.header}>Expenses Overview</Text>
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          onPress={() => toggleChart("pie")}
-          style={[
-            styles.button,
-            selectedChart === "pie"
-              ? styles.activeButton
-              : styles.inactiveButton,
-          ]}
-        >
-          <Text style={styles.buttonText}>Pie Chart</Text>
-        </TouchableOpacity>
-        <TouchableOpacity
-          onPress={() => toggleChart("bar")}
-          style={[
-            styles.button,
-            selectedChart === "bar"
-              ? styles.activeButton
-              : styles.inactiveButton,
-          ]}
-        >
-          <Text style={styles.buttonText}>Bar Chart</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={styles.chartContainer}>
-        {selectedChart === "pie" && pieChartData.length > 0 ? (
-          <PieChart
-            data={pieChartData}
-            width={screenWidth - 32}
-            height={220}
-            chartConfig={chartConfig}
-            accessor={"population"}
-            backgroundColor={"transparent"}
-            paddingLeft={"15"}
-            center={[screenWidth / 4, 10]}
-            avoidFalseZero={true}
-            renderLegend={(legend) => (
+      <ScrollView>
+        <Text style={styles.header}>Expenses Overview</Text>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            onPress={() => toggleChart("pie")}
+            style={[
+              styles.button,
+              selectedChart === "pie"
+                ? styles.activeButton
+                : styles.inactiveButton,
+            ]}
+          >
+            <Text style={styles.buttonText}>Pie Chart</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => toggleChart("bar")}
+            style={[
+              styles.button,
+              selectedChart === "bar"
+                ? styles.activeButton
+                : styles.inactiveButton,
+            ]}
+          >
+            <Text style={styles.buttonText}>Bar Chart</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.chartContainer}>
+          {selectedChart === "pie" && pieChartData.length > 0 ? (
+            <>
+              <PieChart
+                data={pieChartData}
+                width={screenWidth - 32}
+                height={220}
+                chartConfig={chartConfig}
+                accessor={"population"}
+                backgroundColor={"transparent"}
+                paddingLeft={"15"}
+                center={[screenWidth / 4, 0]}
+                absolute
+                hasLegend={false}
+              />
               <View style={styles.legend}>
-                {legend.map((item, index) => (
-                  <Text key={index} style={styles.legendText}>
-                    {`${item.name}: ${item.population}`}
-                  </Text>
+                {pieChartData.map((item, index) => (
+                  <View key={index} style={styles.legendItem}>
+                    <View
+                      style={[
+                        styles.legendIndicator,
+                        { backgroundColor: item.color },
+                      ]}
+                    />
+                    <Text style={styles.legendText}>{`${
+                      item.name
+                    }: £${item.population.toFixed(2)}`}</Text>
+                  </View>
                 ))}
               </View>
-            )}
-          />
-        ) : selectedChart === "bar" && barChartData.labels.length > 0 ? (
-          <BarChart
-            data={barChartData}
-            width={screenWidth - 32}
-            height={220}
-            yAxisLabel={"£"}
-            chartConfig={chartConfig}
-            verticalLabelRotation={30}
-            fromZero
-            yAxisInterval={1}
-            yLabelsOffset={10}
-            yAxisRange={[0, upperLimit]}
-            showValuesOnTopOfBars
-          />
-        ) : (
-          <Text style={styles.noDataText}>No data available</Text>
-        )}
-      </View>
+            </>
+          ) : selectedChart === "bar" && barChartData.labels.length > 0 ? (
+            <BarChart
+              data={barChartData}
+              width={screenWidth - 64}
+              height={500}
+              paddingRight={30}
+              yAxisLabel={"£"}
+              chartConfig={chartConfig}
+              verticalLabelRotation={30}
+              fromZero
+              yAxisInterval={1}
+              yLabelsOffset={10}
+              yAxisRange={[0, upperLimit]}
+              showValuesOnTopOfBars
+            />
+          ) : (
+            <Text style={styles.noDataText}>No data available</Text>
+          )}
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };
@@ -198,10 +232,32 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     marginTop: 8,
   },
+  legendContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    marginTop: 8,
+  },
+  legendItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginRight: 10,
+    marginBottom: 6,
+    paddingVertical: 4,
+  },
+  legendIndicator: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    marginRight: 6,
+  },
   legendText: {
     textAlign: "center",
+    fontSize: 12,
+    color: "#555",
+  },
+  legendLabel: {
     fontSize: 14,
-    color: "#666666",
   },
   noDataText: {
     textAlign: "center",

@@ -10,8 +10,8 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage"; // Import AsyncStorage
-import { useUser } from "../data/UserContext"; // Adjust the path as necessary
+import AsyncStorage from "@react-native-async-storage/async-storage"; 
+import { useUser } from "../data/UserContext"; 
 
 const LoginScreen = ({ navigation }) => {
   const [username, setUsername] = useState("");
@@ -79,7 +79,6 @@ const LoginScreen = ({ navigation }) => {
         <Text style={styles.createAccountButtonText}>Create Account</Text>
       </TouchableOpacity>
 
-      {/* Button to clear AsyncStorage */}
       <TouchableOpacity
         onPress={clearStorage}
         style={styles.clearStorageButton}
